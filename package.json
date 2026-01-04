@@ -2,7 +2,7 @@
   "name": "harmonious-hands-foundation",
   "version": "0.1.0",
   "private": true,
-  "homepage": "www.harmonioushandsfoundation.com",
+  "homepage": "https://www.harmonioushandsfoundation.com",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
