@@ -106,7 +106,7 @@ const Footer = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
         <div className="footer-bottom">
           <div className="footer-social">
             <div className="social-icons">
-              <a href="#facebook" className="social-link" aria-label="Facebook">
+              <a href="https://www.facebook.com/profile.php?id=61583610363855" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Facebook">
                 <FaFacebook />
               </a>
               <a href="#twitter" className="social-link" aria-label="Twitter">
@@ -132,6 +132,11 @@ const Footer = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
               <a href="#terms" className="legal-link">Terms & Conditions</a>
               <span className="divider">•</span>
               <a href="#tax" className="legal-link">80G Tax Exemption</a>
+            </div>
+            {/* Development credit added here */}
+            <div className="development-credit">
+              <span className="credit-text">Developed by </span>
+              <span className="company-name">RupiQ Technologies</span>
             </div>
           </div>
         </div>
@@ -366,6 +371,7 @@ const Footer = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           display: flex;
           align-items: center;
           gap: 10px;
+          margin-bottom: 8px;
         }
         
         .legal-link {
@@ -385,6 +391,25 @@ const Footer = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           color: #666666;
           opacity: 0.5;
           font-size: 0.8rem;
+        }
+        
+        /* Development Credit */
+        .development-credit {
+          margin-top: 8px;
+          color: #666666;
+          font-size: 0.75rem;
+          opacity: 0.6;
+        }
+        
+        .credit-text {
+          opacity: 0.7;
+        }
+        
+        .company-name {
+          color: #FFA500; /* Changed to yellow color */
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          opacity: 0.9;
         }
         
         /* Responsive Design */

@@ -84,7 +84,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
               <div className="top-social-media">
                 <span className="top-follow-text">Follow us:</span>
                 <div className="social-icons-container">
-                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="top-social-link">
+                  <a href="https://www.facebook.com/profile.php?id=61583610363855" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="top-social-link">
                     <FaFacebook className="social-icon" />
                   </a>
                   <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="top-social-link">
