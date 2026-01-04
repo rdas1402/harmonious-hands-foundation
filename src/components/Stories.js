@@ -1,22 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaTimes, FaCalendar, FaMapMarkerAlt, FaUsers } from 'react-icons/fa';
 
 const Stories = () => {
   const stories = [
     {
-      title: 'Community Engagement Success',
-      description: 'How we reached over 50 communities with our holistic development programs.',
-      image: require('../assets/events/cm_event/cm_event_5.webp')
+      id: 'health_camp',
+      title: 'Health Checkup Camp',
+      date: 'January 04, 2026',
+      location: 'Rural Assam',
+      participants: '100+ Villagers',
+      description: 'Free health checkup camp organized in collaboration with local doctors. Provided basic healthcare services and medicines to underserved communities.',
+      image: require('../assets/events/health_camp/2026-01-04_2.jpeg')
     },
     {
-      title: 'Education Transformation',
-      description: 'Success stories of children who are now thriving in school.',
-      image: require('../assets/events/cm_event/cm_event_6.webp')
+      id: 'cm_event',
+      title: 'Community Meet Event',
+      date: 'December 15, 2023',
+      location: 'Sonari, Assam',
+      participants: '150+ Community Members',
+      description: 'A successful community engagement event where we discussed various development initiatives and gathered feedback from local residents. This event helped us understand the specific needs of the community and plan our future projects accordingly.',
+      image: require('../assets/events/cm_event/cm_event_1.webp')
     },
     {
-      title: 'Cultural Preservation',
-      description: 'Preserving Assam\'s rich cultural heritage through community programs.',
-      image: require('../assets/events/cm_event/cm_event_7.webp')
+      id: 'education_camp',
+      title: 'Education Awareness Camp',
+      date: 'November 22, 2023',
+      location: 'Multiple Villages, Assam',
+      participants: '200+ Students & Parents',
+      description: 'Education awareness camp focused on the importance of schooling, especially for girl children. We distributed educational materials and enrolled 45 new students in schools.',
+      image: require('../assets/events/education_camp/event_2_1.webp')
     }
   ];
 
@@ -137,10 +149,46 @@ const Stories = () => {
     return { date: null, sortKey: null, dateString: null };
   };
 
-  // State for gallery images
+  // Function to load event-specific photos from assets/events/ folder
+  // create context ONCE (outside the function)
+  const eventsContext = require.context(
+    '../assets/events',
+    true, // allow subfolders
+    /\.(jpg|jpeg|png|gif|webp|avif)$/i
+  );
+
+  const loadEventPhotos = (eventId) => {
+    try {
+      const imageFiles = eventsContext
+        .keys()
+        .filter((path) => path.startsWith(`./${eventId}/`));
+
+      const sortedFiles = imageFiles.sort((a, b) => {
+        const getNumber = (str) => {
+          const match = str.match(/\d+/);
+          return match ? parseInt(match[0], 10) : 0;
+        };
+        return getNumber(a) - getNumber(b);
+      });
+
+      return sortedFiles.map((filename) => ({
+        src: eventsContext(filename),
+        eventId,
+        filename: filename.replace(`./${eventId}/`, ''),
+      }));
+    } catch (error) {
+      console.error(`Error loading photos for event ${eventId}:`, error);
+      return [];
+    }
+  };
+
+  // State for gallery images and events
   const [galleryImages, setGalleryImages] = useState([]);
   const [centerIndex, setCenterIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [selectedStory, setSelectedStory] = useState(null);
+  const [eventPhotos, setEventPhotos] = useState([]);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const carouselRef = useRef(null);
 
   // Load all gallery images on component mount
@@ -180,6 +228,36 @@ const Stories = () => {
     setIsTransitioning(true);
     setCenterIndex(index);
     setTimeout(() => setIsTransitioning(false), 400);
+  };
+
+  // Handle "View Event Details" button click
+  const handleViewEvent = (story) => {
+    setSelectedStory(story);
+    const photos = loadEventPhotos(story.id);
+    setEventPhotos(photos);
+    setCurrentPhotoIndex(0);
+    
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+  };
+
+  // Close event modal
+  const handleCloseModal = () => {
+    setSelectedStory(null);
+    setEventPhotos([]);
+    setCurrentPhotoIndex(0);
+    
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
+  };
+
+  // Navigate event photos in modal
+  const handlePrevPhoto = () => {
+    setCurrentPhotoIndex(prev => (prev - 1 + eventPhotos.length) % eventPhotos.length);
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex(prev => (prev + 1) % eventPhotos.length);
   };
 
   // Get 3 images to display (left, center, right)
@@ -231,8 +309,13 @@ const Stories = () => {
                 </div>
                 <div className="story-content">
                   <h3>{story.title}</h3>
-                  <p>{story.description}</p>
-                  <button className="btn">View Gallery</button>
+                  <p>{story.description.substring(0, 100)}...</p>
+                  <button 
+                    className="btn"
+                    onClick={() => handleViewEvent(story)}
+                  >
+                    View Event Details
+                  </button>
                 </div>
               </div>
             ))}
@@ -345,8 +428,13 @@ const Stories = () => {
               </div>
               <div className="story-content">
                 <h3>{story.title}</h3>
-                <p>{story.description}</p>
-                <button className="btn">View Gallery</button>
+                <p>{story.description.substring(0, 100)}...</p>
+                <button 
+                  className="btn"
+                  onClick={() => handleViewEvent(story)}
+                >
+                  View Event Details
+                </button>
               </div>
             </div>
           ))}
@@ -428,6 +516,115 @@ const Stories = () => {
           </div>
         </div>
       </div>
+
+      {/* Event Details Modal */}
+      {selectedStory && (
+        <div className="event-modal-overlay" onClick={handleCloseModal}>
+          <div className="event-modal-content" onClick={e => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="modal-header">
+              <h3 className="modal-title">{selectedStory.title}</h3>
+              <button className="modal-close" onClick={handleCloseModal}>
+                <FaTimes />
+              </button>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="modal-body">
+              {/* Event Info */}
+              <div className="event-info">
+                <div className="info-item">
+                  <FaCalendar className="info-icon" />
+                  <span>{selectedStory.date}</span>
+                </div>
+                <div className="info-item">
+                  <FaMapMarkerAlt className="info-icon" />
+                  <span>{selectedStory.location}</span>
+                </div>
+                <div className="info-item">
+                  <FaUsers className="info-icon" />
+                  <span>{selectedStory.participants}</span>
+                </div>
+              </div>
+              
+              {/* Event Description */}
+              <div className="event-description">
+                <h4>Event Description</h4>
+                <p>{selectedStory.description}</p>
+              </div>
+              
+              {/* Event Photos */}
+              <div className="event-photos-section">
+                <h4>Event Photos ({eventPhotos.length})</h4>
+                
+                {eventPhotos.length > 0 ? (
+                  <>
+                    {/* Photo Gallery Section - Similar to main page */}
+                    <div className="modal-gallery-carousel-container">
+                      {/* Left Arrow */}
+                      <button 
+                        className="modal-carousel-arrow left-arrow" 
+                        onClick={handlePrevPhoto}
+                        aria-label="Previous"
+                        disabled={eventPhotos.length <= 1}
+                      >
+                        <FaChevronLeft />
+                      </button>
+                      
+                      {/* Main Photo Display */}
+                      <div className="modal-main-photo">
+                        <img 
+                          src={eventPhotos[currentPhotoIndex]?.src} 
+                          alt={`${selectedStory.title} - Photo ${currentPhotoIndex + 1}`}
+                        />
+                      </div>
+                      
+                      {/* Right Arrow */}
+                      <button 
+                        className="modal-carousel-arrow right-arrow" 
+                        onClick={handleNextPhoto}
+                        aria-label="Next"
+                        disabled={eventPhotos.length <= 1}
+                      >
+                        <FaChevronRight />
+                      </button>
+                      
+                      {/* Photo Counter */}
+                      <div className="modal-photo-counter">
+                        {currentPhotoIndex + 1} / {eventPhotos.length}
+                      </div>
+                    </div>
+                    
+                    {/* Dot indicators */}
+                    <div className="modal-gallery-dots">
+                      {eventPhotos.map((_, index) => (
+                        <button
+                          key={index}
+                          className={`modal-dot ${index === currentPhotoIndex ? 'active' : ''}`}
+                          onClick={() => setCurrentPhotoIndex(index)}
+                          aria-label={`Go to photo ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="no-photos-message">
+                    <p>No photos available for this event.</p>
+                    <p>Please add photos to <code>assets/events/{selectedStory.id}/</code> folder.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="modal-footer">
+              <button className="btn" onClick={handleCloseModal}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <style jsx>{`
         .stories {
@@ -526,6 +723,7 @@ const Stories = () => {
           margin-bottom: 20px;
           line-height: 1.6;
           font-size: 1.05rem;
+          min-height: 60px;
         }
         
         .btn {
@@ -759,49 +957,6 @@ const Stories = () => {
           transform: scale(1.05);
         }
         
-        .center-badge {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          background: rgba(255, 165, 0, 0.9);
-          color: #2c3e50;
-          padding: 10px 18px;
-          border-radius: 25px;
-          font-size: 0.9rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 1.5px;
-          animation: pulse 2s infinite;
-          box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
-          z-index: 11;
-          backdrop-filter: blur(5px);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 5px;
-        }
-        
-        .image-number {
-          font-size: 0.8rem;
-          font-weight: 600;
-          opacity: 0.9;
-        }
-        
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 0.9;
-          }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-        
         /* Dot indicators */
         .gallery-dots {
           display: flex;
@@ -860,6 +1015,323 @@ const Stories = () => {
         .sorting-info {
           font-size: 0.85rem;
           opacity: 0.7;
+        }
+        
+        /* ============ EVENT MODAL STYLES ============ */
+        /* Using the same orange theme as the rest of the app */
+        .event-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.85);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 2000;
+          padding: 20px;
+          backdrop-filter: blur(5px);
+        }
+        
+        .event-modal-content {
+          background: #ffffff;
+          border-radius: 15px;
+          width: 90%;
+          max-width: 1000px;
+          max-height: 90vh;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+          animation: modalFadeIn 0.3s ease;
+          border: 1px solid rgba(255, 165, 0, 0.2);
+        }
+        
+        .event-modal-content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 5px;
+          background: #FFA500;
+          border-radius: 15px 15px 0 0;
+        }
+        
+        @keyframes modalFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .modal-header {
+          background: #ffffff;
+          color: #2c3e50;
+          padding: 25px 30px 15px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 2px solid rgba(255, 165, 0, 0.2);
+        }
+        
+        .modal-title {
+          margin: 0;
+          font-size: 1.8rem;
+          font-weight: 800;
+          color: #2c3e50;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        
+        .modal-close {
+          background: #FFA500;
+          color: #2c3e50 !important;
+          border: none;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 1.2rem;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 10px rgba(255, 165, 0, 0.3);
+        }
+        
+        .modal-close:hover {
+          background: #FF8C00;
+          transform: rotate(90deg);
+          box-shadow: 0 6px 15px rgba(255, 165, 0, 0.4);
+        }
+        
+        .modal-body {
+          padding: 30px;
+          flex: 1;
+          overflow-y: auto;
+        }
+        
+        .event-info {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 25px;
+          margin-bottom: 30px;
+          padding-bottom: 25px;
+          border-bottom: 2px solid rgba(255, 165, 0, 0.2);
+        }
+        
+        .info-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 1rem;
+          color: #2c3e50;
+          padding: 10px 15px;
+          background: rgba(255, 165, 0, 0.1);
+          border-radius: 8px;
+          border: 1px solid rgba(255, 165, 0, 0.2);
+          transition: all 0.3s ease;
+        }
+        
+        .info-item:hover {
+          background: rgba(255, 165, 0, 0.15);
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(255, 165, 0, 0.2);
+        }
+        
+        .info-icon {
+          color: #FFA500;
+          font-size: 1.1rem;
+          flex-shrink: 0;
+        }
+        
+        .event-description {
+          margin-bottom: 40px;
+          padding: 25px;
+          background: linear-gradient(to bottom, #fffaf0, #ffffff);
+          border-radius: 10px;
+          border: 1px solid rgba(255, 165, 0, 0.2);
+          box-shadow: 0 5px 20px rgba(255, 165, 0, 0.1);
+        }
+        
+        .event-description h4 {
+          color: #2c3e50;
+          font-size: 1.5rem;
+          margin-bottom: 20px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          padding-bottom: 10px;
+          border-bottom: 2px solid rgba(255, 165, 0, 0.3);
+        }
+        
+        .event-description p {
+          color: #666;
+          line-height: 1.8;
+          font-size: 1.1rem;
+        }
+        
+        .event-photos-section {
+          background: #ffffff;
+          padding: 30px;
+          border-radius: 15px;
+          border: 1px solid rgba(255, 165, 0, 0.2);
+          box-shadow: 0 10px 30px rgba(255, 165, 0, 0.15);
+        }
+        
+        .event-photos-section h4 {
+          color: #2c3e50;
+          font-size: 1.5rem;
+          margin-bottom: 25px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          text-align: center;
+          padding-bottom: 15px;
+          border-bottom: 2px solid rgba(255, 165, 0, 0.3);
+        }
+        
+        /* Modal Gallery Carousel - Similar to main page gallery */
+        .modal-gallery-carousel-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 30px;
+          margin-bottom: 25px;
+          position: relative;
+          height: 400px;
+          min-height: 400px;
+          width: 100%;
+        }
+        
+        .modal-carousel-arrow {
+          background: rgba(255, 165, 0, 0.7);
+          color: #2c3e50;
+          border: none;
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 1.8rem;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
+          box-shadow: 0 4px 15px rgba(255, 165, 0, 0.2);
+          z-index: 10;
+          position: relative;
+          margin: 0;
+          backdrop-filter: blur(5px);
+          border: 2px solid rgba(255, 165, 0, 0.3);
+        }
+        
+        .modal-carousel-arrow:hover:not(:disabled) {
+          background: rgba(255, 165, 0, 0.9);
+          transform: scale(1.1);
+          box-shadow: 0 6px 20px rgba(255, 165, 0, 0.3);
+        }
+        
+        .modal-carousel-arrow:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+          transform: none !important;
+        }
+        
+        .modal-main-photo {
+          flex: 1;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f8f8f8;
+          border-radius: 15px;
+          overflow: hidden;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+          border: 4px solid #FFA500;
+        }
+        
+        .modal-main-photo img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+        }
+        
+        .modal-photo-counter {
+          position: absolute;
+          bottom: 15px;
+          right: 15px;
+          background: rgba(0, 0, 0, 0.7);
+          color: #ffffff;
+          padding: 8px 20px;
+          border-radius: 25px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          backdrop-filter: blur(5px);
+        }
+        
+        .modal-gallery-dots {
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-top: 20px;
+          margin-bottom: 10px;
+        }
+        
+        .modal-dot {
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #ddd;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          padding: 0;
+          flex-shrink: 0;
+        }
+        
+        .modal-dot.active {
+          background: #FFA500;
+          transform: scale(1.4);
+          box-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+        }
+        
+        .modal-dot:hover:not(:disabled) {
+          background: #FFA500;
+          transform: scale(1.2);
+        }
+        
+        .no-photos-message {
+          text-align: center;
+          padding: 40px;
+          color: #666;
+          background: #f8f8f8;
+          border-radius: 10px;
+          margin-top: 20px;
+          border: 1px solid rgba(255, 165, 0, 0.2);
+        }
+        
+        .no-photos-message code {
+          background: #e0e0e0;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-family: monospace;
+          color: #2c3e50;
+        }
+        
+        .modal-footer {
+          padding: 20px 30px;
+          border-top: 1px solid rgba(255, 165, 0, 0.2);
+          display: flex;
+          justify-content: flex-end;
+          background: linear-gradient(to bottom, #fffaf0, #ffffff);
         }
         
         /* Responsive Design */
@@ -982,6 +1454,17 @@ const Stories = () => {
           .gallery-spacing {
             height: 50px;
           }
+          
+          /* Modal Responsive */
+          .event-modal-content {
+            width: 95%;
+            max-height: 85vh;
+          }
+          
+          .modal-gallery-carousel-container {
+            height: 350px;
+            min-height: 350px;
+          }
         }
         
         @media (max-width: 768px) {
@@ -1030,17 +1513,42 @@ const Stories = () => {
             height: 320px;
           }
           
-          .center-badge {
-            padding: 8px 14px;
-            font-size: 0.8rem;
-          }
-          
           .gallery-header-divider {
             max-width: 80px;
           }
           
           .gallery-spacing {
             height: 40px;
+          }
+          
+          /* Modal Responsive */
+          .modal-header {
+            padding: 20px 25px 15px;
+          }
+          
+          .modal-title {
+            font-size: 1.5rem;
+          }
+          
+          .modal-body {
+            padding: 20px;
+          }
+          
+          .event-info {
+            flex-direction: column;
+            gap: 15px;
+          }
+          
+          .modal-gallery-carousel-container {
+            height: 300px;
+            min-height: 300px;
+            gap: 20px;
+          }
+          
+          .modal-carousel-arrow {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
           }
         }
         
@@ -1083,6 +1591,24 @@ const Stories = () => {
             flex-direction: column;
             gap: 3px;
           }
+          
+          /* Modal Responsive */
+          .event-modal-content {
+            padding: 0;
+            max-height: 80vh;
+          }
+          
+          .modal-gallery-carousel-container {
+            height: 250px;
+            min-height: 250px;
+            gap: 15px;
+          }
+          
+          .modal-carousel-arrow {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+          }
         }
         
         @media (max-width: 480px) {
@@ -1121,6 +1647,30 @@ const Stories = () => {
           
           .gallery-spacing {
             height: 20px;
+          }
+          
+          /* Modal Responsive */
+          .modal-title {
+            font-size: 1.3rem;
+          }
+          
+          .modal-close {
+            width: 35px;
+            height: 35px;
+          }
+          
+          .modal-gallery-carousel-container {
+            height: 220px;
+            min-height: 220px;
+          }
+          
+          .event-info {
+            gap: 10px;
+          }
+          
+          .info-item {
+            padding: 8px 12px;
+            font-size: 0.9rem;
           }
         }
       `}</style>

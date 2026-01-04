@@ -109,6 +109,14 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           <div className="header-content">
             {/* Logo Text in White Header (Left Side) */}
             <div className="logo-text-section">
+              {/* Mobile Logo Image - Only visible on mobile */}
+              <div className="mobile-logo">
+                <img 
+                  src={require('../assets/logo.jpg')} 
+                  alt="Harmonious Hands Foundation Logo"
+                  className="mobile-logo-img"
+                />
+              </div>
               <div className="logo-text-container">
                 <h1>Harmonious Hands Foundation</h1>
                 <p className="tagline">Building Inclusive Communities</p>
@@ -168,6 +176,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
               <button 
                 className="menu-toggle"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               >
                 {isMenuOpen ? <FaTimes /> : <FaBars />}
               </button>
@@ -388,6 +397,10 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           flex-shrink: 0;
         }
         
+        .mobile-logo {
+          display: none;
+        }
+        
         .logo-text-container {
           text-align: left;
           margin: 0;
@@ -510,6 +523,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           cursor: pointer;
           padding: 0;
           margin: 0 10px 0 20px;
+          z-index: 1003;
         }
         
         /* ============ MOBILE CONTACT STYLES ============ */
@@ -701,6 +715,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           .main-header {
             top: 0 !important;
             height: 70px;
+            padding: 0 15px;
           }
           
           .menu-toggle {
@@ -722,6 +737,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             align-items: stretch;
             margin: 0;
             height: auto;
+            padding: 0;
           }
           
           .nav.active {
@@ -731,63 +747,81 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           .nav-menu {
             flex-direction: column;
             padding: 20px;
-            gap: 15px;
+            gap: 0;
             align-items: stretch;
             width: 100%;
             height: auto;
+            margin: 0;
           }
           
           .nav-menu li {
             width: 100%;
+            margin: 0;
+            padding: 0;
           }
           
           .nav-link {
             display: block;
-            padding: 12px 0;
+            padding: 15px 20px;
             font-size: 1rem;
             border-bottom: 1px solid #eee;
             height: auto;
+            width: 100%;
+            text-align: left;
+            justify-content: flex-start;
           }
           
           .nav-btn {
-            margin: 20px 0 0 0;
-            width: 100%;
+            margin: 20px 20px 0 20px;
+            width: calc(100% - 40px);
             text-align: center;
             font-size: 1rem;
             height: auto;
+            padding: 12px !important;
           }
           
           .nav.active .mobile-contact {
             display: block;
           }
           
-          /* Add logo to white header on mobile */
+          /* Mobile logo styling */
+          .mobile-logo {
+            display: block;
+            margin-right: 15px;
+          }
+          
+          .mobile-logo-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 2px solid #ffa500;
+          }
+          
           .logo-text-section {
-            padding-left: 15px;
-            display: flex;
-            align-items: center;
+            padding-left: 0;
+            padding-right: 0;
             gap: 15px;
           }
           
-          .logo-text-section::before {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 60px;
-            background-image: url(${require('../assets/logo.jpg')});
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            flex-shrink: 0;
-            border-radius: 5px;
-          }
-          
           .logo-text-container h1 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            white-space: normal;
+            line-height: 1.2;
           }
           
           .tagline {
             font-size: 0.75rem;
+            white-space: normal;
+          }
+          
+          .header-content {
+            gap: 0;
+            justify-content: space-between;
+          }
+          
+          .nav-section {
+            margin-right: 0;
           }
         }
         
@@ -796,9 +830,9 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             gap: 10px;
           }
           
-          .logo-text-section::before {
-            width: 50px;
-            height: 50px;
+          .mobile-logo-img {
+            width: 45px;
+            height: 45px;
           }
           
           .logo-text-container h1 {
@@ -827,9 +861,9 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             font-size: 0.65rem;
           }
           
-          .logo-text-section::before {
-            width: 45px;
-            height: 45px;
+          .mobile-logo-img {
+            width: 40px;
+            height: 40px;
           }
         }
       `}</style>
