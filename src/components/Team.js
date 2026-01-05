@@ -4,7 +4,6 @@ import { FaChevronLeft, FaChevronRight, FaQuoteLeft, FaUsers, FaArrowLeft, FaArr
 const Team = () => {
   // Board of Directors (Previously Trustees)
   const boardMembers = [
-    
     {
       id: 1,
       name: "SriSri Dr. Pitamber Deba Goswami",
@@ -381,7 +380,7 @@ const Team = () => {
                   <h3>Managing Committee</h3>
                 </div>
                 <div className="committee-content">
-                  <p>
+                  <p className="committee-description">
                     Harmonious Hands Foundation's executive team comprising Regional and 
                     Functional Directors who provide day-to-day leadership and implement 
                     strategic objectives. Our Managing Committee brings together specialized 
@@ -510,11 +509,6 @@ const Team = () => {
         .top-brush {
           top: 0;
           transform: rotate(180deg);
-          opacity: 0.8;
-        }
-        
-        .bottom-brush {
-          bottom: 0;
           opacity: 0.8;
         }
         
@@ -689,10 +683,11 @@ const Team = () => {
           box-shadow: 0 15px 40px rgba(255, 165, 0, 0.2);
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 165, 0, 0.3);
-          overflow: hidden;
+          overflow: visible;
           position: relative;
           min-height: 600px;
           z-index: 2;
+          width: 100%;
         }
         
         .team-unified-panel::before {
@@ -710,12 +705,15 @@ const Team = () => {
           padding: 40px;
           border-right: 1px solid rgba(255, 165, 0, 0.3);
           background: rgba(255, 255, 255, 0.95);
+          width: 100%;
+          overflow: visible;
         }
         
         .committee-card {
           height: 100%;
           display: flex;
           flex-direction: column;
+          width: 100%;
         }
         
         .committee-header {
@@ -723,6 +721,7 @@ const Team = () => {
           align-items: center;
           gap: 15px;
           margin-bottom: 25px;
+          width: 100%;
         }
         
         .committee-icon {
@@ -736,6 +735,7 @@ const Team = () => {
           justify-content: center;
           font-size: 1.5rem;
           box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+          flex-shrink: 0;
         }
         
         .committee-header h3 {
@@ -743,10 +743,22 @@ const Team = () => {
           font-size: 1.8rem;
           margin: 0;
           font-weight: 700;
+          line-height: 1.3;
+          word-wrap: break-word;
         }
         
         .committee-content {
           flex: 1;
+          width: 100%;
+        }
+        
+        .committee-description {
+          color: #555;
+          line-height: 1.8;
+          font-size: 1.05rem;
+          margin-bottom: 30px;
+          width: 100%;
+          word-wrap: break-word;
         }
         
         .committee-content p {
@@ -754,6 +766,8 @@ const Team = () => {
           line-height: 1.8;
           font-size: 1.05rem;
           margin-bottom: 30px;
+          width: 100%;
+          word-wrap: break-word;
         }
         
         .committee-stats {
@@ -765,6 +779,7 @@ const Team = () => {
           border-radius: 12px;
           border: 1px solid rgba(255, 165, 0, 0.3);
           margin-bottom: 35px;
+          width: 100%;
         }
         
         .stat-item {
@@ -772,6 +787,7 @@ const Team = () => {
           flex-direction: column;
           align-items: center;
           text-align: center;
+          min-width: 0;
         }
         
         .stat-number {
@@ -781,23 +797,28 @@ const Team = () => {
           line-height: 1;
           margin-bottom: 8px;
           text-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
+          display: block;
         }
         
         .stat-label {
           font-size: 0.9rem;
           color: #666;
           line-height: 1.3;
+          display: block;
         }
         
         /* Right Column Styles - Team Members */
         .members-column {
           padding: 40px;
+          overflow: visible;
+          width: 100%;
         }
         
         .team-members-section {
           height: 100%;
           display: flex;
           flex-direction: column;
+          width: 100%;
         }
         
         .team-members-header {
@@ -805,6 +826,9 @@ const Team = () => {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 30px;
+          width: 100%;
+          flex-wrap: wrap;
+          gap: 15px;
         }
         
         .team-members-header h3 {
@@ -812,6 +836,7 @@ const Team = () => {
           font-size: 1.8rem;
           margin: 0;
           font-weight: 700;
+          line-height: 1.3;
         }
         
         .team-counter {
@@ -822,15 +847,18 @@ const Team = () => {
           padding: 8px 18px;
           border-radius: 25px;
           border: 1px solid rgba(255, 165, 0, 0.3);
+          flex-shrink: 0;
         }
         
-        /* Navigation and Team Members */
+        /* Navigation and Team Members - FIXED ARROW POSITIONING */
         .team-members-navigation {
           flex: 1;
           display: flex;
           align-items: center;
           gap: 25px;
           margin-bottom: 30px;
+          width: 100%;
+          position: relative;
         }
         
         .arrow-btn {
@@ -848,6 +876,8 @@ const Team = () => {
           font-size: 1.3rem;
           box-shadow: 0 5px 20px rgba(255, 165, 0, 0.4);
           flex-shrink: 0;
+          position: relative;
+          z-index: 10;
         }
         
         .arrow-btn:hover {
@@ -856,11 +886,21 @@ const Team = () => {
           box-shadow: 0 8px 25px rgba(255, 165, 0, 0.6);
         }
         
+        /* Ensure both arrows are visible */
+        .left-arrow, .right-arrow {
+          visibility: visible;
+          opacity: 1;
+          display: flex;
+        }
+        
         .team-members-grid {
           flex: 1;
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 35px;
+          width: 100%;
+          position: relative;
+          z-index: 1;
         }
         
         .team-member-card {
@@ -872,7 +912,9 @@ const Team = () => {
           border: 1px solid rgba(255, 165, 0, 0.3);
           display: flex;
           flex-direction: column;
-          height: 480px;
+          height: auto;
+          min-height: 480px;
+          width: 100%;
         }
         
         .team-member-card:hover {
@@ -886,6 +928,7 @@ const Team = () => {
           height: 280px;
           overflow: hidden;
           flex-shrink: 0;
+          width: 100%;
         }
         
         .member-image-wrapper {
@@ -932,6 +975,7 @@ const Team = () => {
           flex: 1;
           display: flex;
           flex-direction: column;
+          width: 100%;
         }
         
         .member-info h4 {
@@ -941,6 +985,7 @@ const Team = () => {
           font-weight: 700;
           line-height: 1.4;
           min-height: 40px;
+          word-wrap: break-word;
         }
         
         .member-description {
@@ -949,7 +994,7 @@ const Team = () => {
           line-height: 1.6;
           margin-bottom: 20px;
           flex: 1;
-          min-height: 60px;
+          word-wrap: break-word;
         }
         
         .member-divider {
@@ -964,6 +1009,7 @@ const Team = () => {
           justify-content: space-between;
           align-items: center;
           margin-top: auto;
+          width: 100%;
         }
         
         .contact-label {
@@ -989,6 +1035,8 @@ const Team = () => {
           margin-top: 30px;
           padding-top: 25px;
           border-top: 1px solid rgba(255, 165, 0, 0.3);
+          width: 100%;
+          flex-wrap: wrap;
         }
         
         .dot {
@@ -1000,6 +1048,7 @@ const Team = () => {
           cursor: pointer;
           transition: all 0.3s ease;
           padding: 0;
+          flex-shrink: 0;
         }
         
         .dot.active {
@@ -1012,10 +1061,11 @@ const Team = () => {
           background: #FFA500;
         }
         
-        /* Responsive Design */
+        /* Responsive Design - FIXED FOR MOBILE */
         @media (max-width: 1200px) {
           .team-unified-panel {
             grid-template-columns: 1fr;
+            min-height: auto;
           }
           
           .committee-column {
@@ -1028,7 +1078,7 @@ const Team = () => {
           }
           
           .team-member-card {
-            height: 450px;
+            min-height: 450px;
           }
           
           .member-image-container {
@@ -1039,6 +1089,7 @@ const Team = () => {
         @media (max-width: 992px) {
           .team {
             padding: 60px 0;
+            scroll-margin-top: 70px;
           }
           
           .section-title {
@@ -1047,6 +1098,7 @@ const Team = () => {
           
           .team-tabs {
             gap: 15px;
+            flex-wrap: wrap;
           }
           
           .team-tab {
@@ -1057,7 +1109,6 @@ const Team = () => {
           .team-members-grid {
             grid-template-columns: 1fr;
             gap: 25px;
-            max-width: 500px;
             margin: 0 auto;
           }
           
@@ -1076,54 +1127,90 @@ const Team = () => {
           }
           
           .team-member-card {
-            height: 460px;
+            min-height: 460px;
+            margin-bottom: 20px;
           }
           
           .member-image-container {
             height: 270px;
+          }
+          
+          .team-unified-panel {
+            margin: 0;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(255, 165, 0, 0.15);
+            border: 1px solid rgba(255, 165, 0, 0.2);
           }
         }
         
         @media (max-width: 768px) {
           .section-title {
             font-size: 2rem;
+            padding: 0 10px;
+            text-align: center;
           }
           
           .team-subtitle {
             font-size: 1.1rem;
             padding: 15px 20px;
+            margin: 0 10px;
           }
           
           .team-tabs {
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
             gap: 10px;
+            padding: 0 15px;
+            justify-content: center;
           }
           
           .team-tab {
-            width: 100%;
-            max-width: 300px;
+            width: auto;
+            max-width: none;
             justify-content: center;
+            padding: 12px 20px;
+            font-size: 0.95rem;
           }
           
           .team-unified-panel {
             border-radius: 15px;
+            margin: 0;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
           }
           
           .committee-column,
           .members-column {
-            padding: 25px;
+            padding: 25px 20px;
+            width: 100%;
           }
           
           .committee-stats {
-            grid-template-columns: 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 15px;
           }
           
           .committee-header {
-            flex-direction: column;
-            text-align: center;
-            gap: 10px;
+            flex-direction: row;
+            text-align: left;
+            gap: 15px;
+          }
+          
+          .committee-header h3 {
+            font-size: 1.6rem;
+          }
+          
+          .committee-description {
+            font-size: 1rem;
+            line-height: 1.7;
+          }
+          
+          .committee-content p {
+            font-size: 1rem;
+            line-height: 1.7;
           }
           
           .team-members-header {
@@ -1136,33 +1223,75 @@ const Team = () => {
             width: 45px;
             height: 45px;
             font-size: 1.1rem;
+            position: static;
+            display: flex;
+            visibility: visible;
+            opacity: 1;
           }
           
           .team-members-navigation {
             gap: 15px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+          }
+          
+          .team-members-grid {
+            order: 2;
+            width: 100%;
+            margin: 0;
+          }
+          
+          .left-arrow {
+            order: 1;
+          }
+          
+          .right-arrow {
+            order: 3;
           }
           
           .team-member-card {
-            height: 440px;
+            min-height: 420px;
+            margin: 0;
           }
           
           .member-image-container {
-            height: 250px;
+            height: 220px;
           }
           
           .brush-decoration {
             height: 80px;
+          }
+          
+          .container {
+            padding-left: 15px;
+            padding-right: 15px;
+            width: 100%;
+            max-width: 100%;
+          }
+          
+          .team-members-grid {
+            width: 100%;
+          }
+          
+          .stat-number {
+            font-size: 1.8rem;
+          }
+          
+          .stat-label {
+            font-size: 0.85rem;
           }
         }
         
         @media (max-width: 480px) {
           .section-title {
             font-size: 1.8rem;
+            padding: 0 10px;
           }
           
           .committee-column,
           .members-column {
-            padding: 20px;
+            padding: 20px 15px;
           }
           
           .committee-header h3,
@@ -1170,14 +1299,29 @@ const Team = () => {
             font-size: 1.5rem;
           }
           
+          .committee-header {
+            gap: 12px;
+          }
+          
+          .committee-icon {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+          }
+          
           .arrow-btn {
             width: 40px;
             height: 40px;
             font-size: 1rem;
+            display: flex;
+            visibility: visible;
+            opacity: 1;
           }
           
           .team-members-grid {
             gap: 20px;
+            margin: 0;
+            width: 100%;
           }
           
           .brush-decoration {
@@ -1185,15 +1329,100 @@ const Team = () => {
           }
           
           .team-member-card {
-            height: 420px;
+            min-height: 380px;
+            margin: 0;
           }
           
           .member-image-container {
-            height: 230px;
+            height: 200px;
+          }
+          
+          .member-info {
+            padding: 20px 15px;
           }
           
           .member-info h4 {
             font-size: 1.2rem;
+          }
+          
+          .member-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+          }
+          
+          .committee-description {
+            font-size: 0.95rem;
+            line-height: 1.6;
+          }
+          
+          .committee-content p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+          }
+          
+          .stat-number {
+            font-size: 1.6rem;
+          }
+          
+          .stat-label {
+            font-size: 0.8rem;
+          }
+          
+          .committee-stats {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 12px;
+          }
+          
+          .team-members-navigation {
+            gap: 10px;
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .team-member-card {
+            min-height: 350px;
+          }
+          
+          .member-image-container {
+            height: 180px;
+          }
+          
+          .committee-description {
+            font-size: 0.9rem;
+          }
+          
+          .committee-content p {
+            font-size: 0.9rem;
+          }
+          
+          .team-tab {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+          }
+          
+          .committee-stats {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 10px;
+          }
+          
+          .stat-number {
+            font-size: 1.5rem;
+          }
+          
+          .stat-label {
+            font-size: 0.75rem;
+          }
+          
+          .arrow-btn {
+            width: 35px;
+            height: 35px;
+            font-size: 0.9rem;
+          }
+          
+          .team-members-navigation {
+            gap: 8px;
           }
         }
       `}</style>
