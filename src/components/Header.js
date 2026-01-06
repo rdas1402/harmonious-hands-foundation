@@ -107,7 +107,16 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
       <header className={`main-header ${isScrolled ? 'scrolled' : ''}`}>
         <div className="container">
           <div className="header-content">
-            {/* Logo Text in White Header (Left Side) */}
+            {/* Menu toggle button on left for mobile */}
+            <button 
+              className="menu-toggle"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {isMenuOpen ? <FaTimes /> : <FaBars />}
+            </button>
+            
+            {/* Logo Text in White Header (Center) */}
             <div className="logo-text-section">
               {/* Mobile Logo Image - Only visible on mobile */}
               <div className="mobile-logo">
@@ -172,14 +181,6 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
                   </div>
                 </div>
               </nav>
-              
-              <button 
-                className="menu-toggle"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              >
-                {isMenuOpen ? <FaTimes /> : <FaBars />}
-              </button>
             </div>
           </div>
         </div>
@@ -386,7 +387,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           gap: 70px;
         }
         
-        /* Logo Text Section in White Header (Left Side) */
+        /* Logo Text Section in White Header (Center) */
         .logo-text-section {
           display: flex;
           align-items: center;
@@ -514,6 +515,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           color: white !important;
         }
         
+        /* MENU TOGGLE BUTTON - MOVED TO LEFT TOP */
         .menu-toggle {
           display: none;
           background: none;
@@ -522,8 +524,9 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           color: #333333;
           cursor: pointer;
           padding: 0;
-          margin: 0 10px 0 20px;
+          margin: 0;
           z-index: 1003;
+          order: -1; /* This ensures it appears first on the left */
         }
         
         /* ============ MOBILE CONTACT STYLES ============ */
@@ -720,6 +723,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           
           .menu-toggle {
             display: block;
+            order: -1; /* Force it to be first/leftmost */
           }
           
           .nav {
@@ -802,6 +806,13 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             padding-left: 0;
             padding-right: 0;
             gap: 15px;
+            flex: 1;
+            justify-content: center;
+            margin-left: 10px; /* Add space after hamburger button */
+          }
+          
+          .logo-text-container {
+            text-align: center;
           }
           
           .logo-text-container h1 {
@@ -817,17 +828,20 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           
           .header-content {
             gap: 0;
-            justify-content: space-between;
+            justify-content: flex-start; /* Align items to start to keep hamburger on left */
+            position: relative;
           }
           
           .nav-section {
             margin-right: 0;
+            display: none; /* Hide nav section on mobile, we'll show it in the menu */
           }
         }
         
         @media (max-width: 480px) {
           .logo-text-section {
             gap: 10px;
+            margin-left: 5px;
           }
           
           .mobile-logo-img {
@@ -850,6 +864,10 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           .header-content {
             padding: 8px 0;
           }
+          
+          .menu-toggle {
+            margin-right: 5px;
+          }
         }
         
         @media (max-width: 360px) {
@@ -864,6 +882,10 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           .mobile-logo-img {
             width: 40px;
             height: 40px;
+          }
+          
+          .menu-toggle {
+            font-size: 1.3rem;
           }
         }
       `}</style>
