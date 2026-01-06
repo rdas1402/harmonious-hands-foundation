@@ -834,7 +834,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           
           .nav-section {
             margin-right: 0;
-            display: none; /* Hide nav section on mobile, we'll show it in the menu */
+            display: flex; /* Changed from display: none to display: flex */
           }
         }
         
