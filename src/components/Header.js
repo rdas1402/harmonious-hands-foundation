@@ -1,18 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaBars, FaTimes, FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaPhone, FaEnvelope } from 'react-icons/fa';
 
-const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonationPage prop
+const Header = ({ onDonateClick, isDonationPage = false }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const headerRef = useRef(null);
 
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      const currentScrollY = window.scrollY;
+      
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // Show/hide header based on scroll direction
+          if (currentScrollY > lastScrollY && currentScrollY > 100) {
+            // Scrolling DOWN and past 100px - hide header
+            setIsHeaderVisible(false);
+          } else if (currentScrollY < lastScrollY) {
+            // Scrolling UP - show header
+            setIsHeaderVisible(true);
+          }
+          
+          // Set scrolled state for styling
+          setIsScrolled(currentScrollY > 10);
+          
+          setLastScrollY(currentScrollY);
+          ticking = false;
+        });
+        
+        ticking = true;
+      }
     };
     
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
+
+  // Close menu when header hides
+  useEffect(() => {
+    if (!isHeaderVisible) {
+      setIsMenuOpen(false);
+    }
+  }, [isHeaderVisible]);
 
   const handleDonateClick = (e) => {
     e.preventDefault();
@@ -51,7 +87,10 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
   return (
     <>
       {/* Top Black Bar - Small Contact Header */}
-      <div className="top-black-bar">
+      <div 
+        className={`top-black-bar ${isHeaderVisible ? 'visible' : 'hidden'}`}
+        ref={headerRef}
+      >
         <div className="container">
           <div className="top-bar-content">
             
@@ -104,7 +143,10 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
       </div>
 
       {/* Main White Header - Navigation */}
-      <header className={`main-header ${isScrolled ? 'scrolled' : ''}`}>
+      <header 
+        className={`main-header ${isScrolled ? 'scrolled' : ''} ${isHeaderVisible ? 'visible' : 'hidden'}`}
+        ref={headerRef}
+      >
         <div className="container">
           <div className="header-content">
             {/* Menu toggle button on left for mobile */}
@@ -127,7 +169,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
                 />
               </div>
               <div className="logo-text-container">
-                <h1>Harmonious Hands Foundation</h1>
+                <h1 className="logo-title">Harmonious Hands Foundation</h1>
                 <p className="tagline">Building Inclusive Communities</p>
               </div>
             </div>
@@ -203,6 +245,14 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           display: flex;
           align-items: center;
           border-bottom: 1px solid #333;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transform: translateY(0);
+          opacity: 1;
+        }
+        
+        .top-black-bar.hidden {
+          transform: translateY(-100%);
+          opacity: 0;
         }
         
         .top-black-bar * {
@@ -362,10 +412,17 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           left: 0;
           right: 0;
           z-index: 1001;
-          transition: all 0.3s ease;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           height: 80px;
           display: flex;
           align-items: center;
+          transform: translateY(0);
+          opacity: 1;
+        }
+        
+        .main-header.hidden {
+          transform: translateY(-100%);
+          opacity: 0;
         }
         
         .main-header.scrolled {
@@ -409,7 +466,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           min-width: 0;
         }
         
-        .logo-text-container h1 {
+        .logo-title {
           color: #2c3e50;
           font-size: 1.5rem;
           margin: 0 0 5px 0;
@@ -584,7 +641,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             gap: 18px;
           }
           
-          .logo-text-container h1 {
+          .logo-title {
             font-size: 1.4rem;
           }
           
@@ -606,7 +663,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             font-size: 0.9rem;
           }
           
-          .logo-text-container h1 {
+          .logo-title {
             font-size: 1.3rem;
           }
           
@@ -649,7 +706,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             font-size: 0.88rem;
           }
           
-          .logo-text-container h1 {
+          .logo-title {
             font-size: 1.2rem;
           }
           
@@ -684,7 +741,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             gap: 10px;
           }
           
-          .logo-text-container h1 {
+          .logo-title {
             font-size: 1.1rem;
           }
           
@@ -711,12 +768,43 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
         }
         
         @media (max-width: 768px) {
+          /* FIX: Show top black bar on mobile with simplified content */
           .top-black-bar {
-            display: none !important;
+            display: flex !important;
+            height: 40px; /* Slightly taller for mobile */
+            font-size: 0.7rem;
           }
           
           .main-header {
-            top: 0 !important;
+            top: 40px !important; /* Adjust for taller top bar */
+          }
+          
+          .top-bar-logo {
+            display: none; /* Hide logo in top bar on mobile */
+          }
+          
+          .top-bar-right {
+            padding-left: 0;
+            justify-content: center;
+            width: 100%;
+            gap: 20px;
+          }
+          
+          .top-contact-info {
+            flex-direction: column;
+            gap: 5px;
+            align-items: flex-start;
+          }
+          
+          .top-social-media {
+            display: none; /* Hide social media on mobile top bar */
+          }
+          
+          .top-contact-link {
+            font-size: 0.65rem;
+          }
+          
+          .main-header {
             height: 70px;
             padding: 0 15px;
           }
@@ -724,17 +812,18 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           .menu-toggle {
             display: block;
             order: -1; /* Force it to be first/leftmost */
+            margin-right: 10px;
           }
           
           .nav {
             position: fixed;
-            top: 70px;
+            top: 110px; /* 40px (top bar) + 70px (header) */
             left: 0;
             right: 0;
             background: white;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             display: none;
-            max-height: calc(100vh - 70px);
+            max-height: calc(100vh - 110px);
             overflow-y: auto;
             z-index: 1000;
             flex-direction: column;
@@ -791,7 +880,7 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           /* Mobile logo styling */
           .mobile-logo {
             display: block;
-            margin-right: 15px;
+            margin-right: 10px;
           }
           
           .mobile-logo-img {
@@ -805,43 +894,101 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
           .logo-text-section {
             padding-left: 0;
             padding-right: 0;
-            gap: 15px;
+            gap: 10px;
             flex: 1;
-            justify-content: center;
-            margin-left: 10px; /* Add space after hamburger button */
+            justify-content: flex-start; /* Align to start */
+            margin-left: 0;
           }
           
           .logo-text-container {
-            text-align: center;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
           }
           
-          .logo-text-container h1 {
-            font-size: 1.1rem;
-            white-space: normal;
+          /* FIX FOR TEXT WRAPPING: Ensure "Harmonious Hands Foundation" stays together */
+          .logo-title {
+            font-size: 1rem;
+            white-space: nowrap;
             line-height: 1.2;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
           }
           
           .tagline {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             white-space: normal;
+            line-height: 1.2;
+            display: block;
           }
           
           .header-content {
             gap: 0;
-            justify-content: flex-start; /* Align items to start to keep hamburger on left */
+            justify-content: flex-start;
             position: relative;
           }
           
+          /* Keep nav-section visible on mobile */
           .nav-section {
             margin-right: 0;
-            display: flex; /* Changed from display: none to display: flex */
+            display: flex;
+          }
+        }
+        
+        /* Additional mobile optimization for social media */
+        @media (max-width: 768px) and (min-width: 481px) {
+          .top-bar-right {
+            gap: 10px;
+          }
+          
+          .top-social-media {
+            display: flex;
+            gap: 8px;
+          }
+          
+          .social-icons-container {
+            gap: 8px;
+          }
+          
+          .social-icon {
+            font-size: 0.7rem;
+          }
+          
+          .top-follow-text {
+            display: none; /* Hide "Follow us:" text to save space */
           }
         }
         
         @media (max-width: 480px) {
+          .top-black-bar {
+            height: 35px;
+          }
+          
+          .main-header {
+            top: 35px !important;
+          }
+          
+          .top-contact-info {
+            gap: 3px;
+          }
+          
+          .top-contact-link {
+            font-size: 0.6rem;
+          }
+          
+          .main-header {
+            height: 65px;
+          }
+          
+          .nav {
+            top: 100px; /* 35px (top bar) + 65px (header) */
+            max-height: calc(100vh - 100px);
+          }
+          
           .logo-text-section {
-            gap: 10px;
-            margin-left: 5px;
+            gap: 8px;
           }
           
           .mobile-logo-img {
@@ -849,12 +996,12 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
             height: 45px;
           }
           
-          .logo-text-container h1 {
-            font-size: 1rem;
+          .logo-title {
+            font-size: 0.9rem;
           }
           
           .tagline {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
           }
           
           .mobile-contact-item {
@@ -871,12 +1018,33 @@ const Header = ({ onDonateClick, isDonationPage = false }) => { // Added isDonat
         }
         
         @media (max-width: 360px) {
-          .logo-text-container h1 {
-            font-size: 0.9rem;
+          .top-black-bar {
+            height: 32px;
+          }
+          
+          .main-header {
+            top: 32px !important;
+          }
+          
+          .top-contact-link {
+            font-size: 0.55rem;
+          }
+          
+          .main-header {
+            height: 60px;
+          }
+          
+          .nav {
+            top: 92px; /* 32px (top bar) + 60px (header) */
+            max-height: calc(100vh - 92px);
+          }
+          
+          .logo-title {
+            font-size: 0.8rem;
           }
           
           .tagline {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
           }
           
           .mobile-logo-img {
