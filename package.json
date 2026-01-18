@@ -18,6 +18,7 @@
     "start": "react-scripts start",
     "start:staging": "env-cmd -f .env.staging react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "cp build/index.html build/404.html",
     "build:staging": "env-cmd -f .env.staging react-scripts build",
     "build:production": "env-cmd -f .env.production react-scripts build",
     "build:development": "env-cmd -f .env.local react-scripts build",

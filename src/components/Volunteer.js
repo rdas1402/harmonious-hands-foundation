@@ -1330,6 +1330,7 @@ const Volunteer = ({ onDonateClick }) => {
           .volunteer {
             scroll-margin-top: 70px;
             padding: 40px 0 15px;
+            top: 50px;
           }
           
           .section-title {
@@ -1396,6 +1397,7 @@ const Volunteer = ({ onDonateClick }) => {
           .volunteer {
             scroll-margin-top: 70px;
             font-size: 14px;
+            top: 50px;
           }
           
           .section-title {

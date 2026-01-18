@@ -1746,6 +1746,7 @@ const ContactUs = ({ onClose }) => {
           .contact-us-page {
             padding: 40px 0 20px;
             scroll-margin-top: 70px;
+            top: 50px;
           }
           
           .section-title {
