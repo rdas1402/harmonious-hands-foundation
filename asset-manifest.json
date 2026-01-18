@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.94e040cd.css",
-    "main.js": "/static/js/main.7c822a79.js",
+    "main.js": "/static/js/main.44af40b6.js",
     "static/media/brochure.png": "/static/media/brochure.1814d259eec6e852c880.png",
     "static/media/cm_event_5.webp": "/static/media/cm_event_5.0a2c395837d11b8facb4.webp",
     "static/media/event_2_1.webp": "/static/media/event_2_1.d1b89aa499a8aed230ba.webp",
@@ -64,6 +64,6 @@
   },
   "entrypoints": [
     "static/css/main.94e040cd.css",
-    "static/js/main.7c822a79.js"
+    "static/js/main.44af40b6.js"
   ]
 }
