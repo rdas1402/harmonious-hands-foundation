@@ -1,7 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.36ea862e.css",
-    "main.js": "/static/js/main.59fe7322.js",
+    "main.css": "/static/css/main.94e040cd.css",
+    "main.js": "/static/js/main.7c822a79.js",
+    "static/media/brochure.png": "/static/media/brochure.1814d259eec6e852c880.png",
     "static/media/cm_event_5.webp": "/static/media/cm_event_5.0a2c395837d11b8facb4.webp",
     "static/media/event_2_1.webp": "/static/media/event_2_1.d1b89aa499a8aed230ba.webp",
     "static/media/event_2_8.webp": "/static/media/event_2_8.d1b89aa499a8aed230ba.webp",
@@ -9,9 +10,11 @@
     "static/media/cm_event_2.webp": "/static/media/cm_event_2.04e8a2576ef54a9b89a7.webp",
     "static/media/cm_event_4.webp": "/static/media/cm_event_4.f56041ff1cc55390a267.webp",
     "static/media/cm_event_8.webp": "/static/media/cm_event_8.bab6f3e24352404c9af9.webp",
+    "static/media/volunteer_child.jpeg": "/static/media/volunteer_child.f7906c35bcc627d7453c.jpeg",
     "static/media/with_cm_hemanta_sir_1.webp": "/static/media/with_cm_hemanta_sir_1.246719e9a959681281a6.webp",
     "static/media/with_cm_hemanta_sir_2.webp": "/static/media/with_cm_hemanta_sir_2.942a0bbf287472038f96.webp",
     "static/media/cm_event_1.webp": "/static/media/cm_event_1.bd639d76fe65334dee66.webp",
+    "static/media/abstract-img.jpeg": "/static/media/abstract-img.289a4ca01beea9d142da.jpeg",
     "static/media/cm_event.webp": "/static/media/cm_event.04e60b59f3b772f1b38f.webp",
     "static/media/cm_event_3.webp": "/static/media/cm_event_3.b450d514df269ab2312c.webp",
     "static/media/cm_event_9.webp": "/static/media/cm_event_9.c27ff95defc7519fe54d.webp",
@@ -44,6 +47,7 @@
     "static/media/Pratap_Baruah.avif": "/static/media/Pratap_Baruah.1e9328202a40618aba69.avif",
     "static/media/naba.avif": "/static/media/naba.e390259ab5f3d299f74c.avif",
     "static/media/tulsi.avif": "/static/media/tulsi.09079d3a1ad7d4db9ae9.avif",
+    "static/media/logo_10.jpeg": "/static/media/logo_10.f9fd3b669056c8b5582d.jpeg",
     "static/media/Kapil.avif": "/static/media/Kapil.958a8f58767eadc5fafc.avif",
     "static/media/kalyan.avif": "/static/media/kalyan.d80c36618ecda3b3f767.avif",
     "static/media/shekhar.avif": "/static/media/shekhar.686fc3ab1576a6d086e2.avif",
@@ -56,12 +60,10 @@
     "static/media/Aditya_Goswami.avif": "/static/media/Aditya_Goswami.c6cb83f076395edc90df.avif",
     "static/media/Utpal_Borah.avif": "/static/media/Utpal_Borah.29a90abb500df82a5c9d.avif",
     "static/media/hemanta.avif": "/static/media/hemanta.fbda7693cbb603d5edfd.avif",
-    "index.html": "/index.html",
-    "main.36ea862e.css.map": "/static/css/main.36ea862e.css.map",
-    "main.59fe7322.js.map": "/static/js/main.59fe7322.js.map"
+    "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.36ea862e.css",
-    "static/js/main.59fe7322.js"
+    "static/css/main.94e040cd.css",
+    "static/js/main.7c822a79.js"
   ]
 }
