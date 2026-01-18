@@ -261,176 +261,163 @@ const TermsPage = ({ onClose }) => {
       </div>
 
       <style jsx>{`
-        .terms-page-section {
-          position: relative;
-          padding: 80px 0;
-          color: #333;
-          overflow: hidden;
-          background: #ffffff;
-          min-height: 100vh;
-        }
-        
-        /* Brush Decorations - Same as Team.js */
-        .brush-decoration {
-          position: absolute;
-          left: 0;
-          right: 0;
-          height: 150px;
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-          z-index: 1;
-          pointer-events: none;
-        }
-        
-        .top-brush {
-          top: 0;
-          transform: rotate(180deg);
-          opacity: 0.8;
-        }
-        
-        /* Painting Background Effect - Same as Team.js */
-        .painting-background {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 0;
-          overflow: hidden;
-        }
-        
-        .paint-layer {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(40px);
-          opacity: 0.08;
-          animation: float 20s infinite linear;
-          mix-blend-mode: multiply;
-        }
-        
-        .paint-layer-1 {
-          width: 500px;
-          height: 500px;
-          background: #FFA500;
-          top: -200px;
-          left: -100px;
-          animation-delay: 0s;
-        }
-        
-        .paint-layer-2 {
-          width: 600px;
-          height: 600px;
-          background: #FFA500;
-          top: 50%;
-          right: -200px;
-          transform: translateY(-50%);
-          animation-delay: -5s;
-          animation-direction: reverse;
-        }
-        
-        .paint-layer-3 {
-          width: 400px;
-          height: 400px;
-          background: #FFA500;
-          bottom: -150px;
-          left: 30%;
-          animation-delay: -10s;
-        }
-        
-        .paint-layer-4 {
-          width: 300px;
-          height: 300px;
-          background: #FFA500;
-          top: 20%;
-          left: 40%;
-          animation-delay: -15s;
-          animation-direction: reverse;
-        }
-        
-        @keyframes float {
-          0% {
-            transform: translate(0, 0) rotate(0deg);
-          }
-          25% {
-            transform: translate(20px, 20px) rotate(90deg);
-          }
-          50% {
-            transform: translate(0, 40px) rotate(180deg);
-          }
-          75% {
-            transform: translate(-20px, 20px) rotate(270deg);
-          }
-          100% {
-            transform: translate(0, 0) rotate(360deg);
-          }
-        }
-        
-        /* Header */
-        .terms-header {
-          margin-bottom: 40px;
-          position: relative;
-          z-index: 2;
-        }
-        
-        .back-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: #2c3e50;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.3s;
-          margin-bottom: 20px;
-        }
-        
-        .back-btn:hover {
-          background: #1a252f;
-          transform: translateX(-3px);
-        }
-        
-        .terms-title-section {
-          text-align: center;
-        }
-        
-        .section-title {
-          color: #2c3e50;
-          font-size: 2.8rem;
-          margin-bottom: 15px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .terms-header-divider {
-          width: 100px;
-          height: 4px;
-          background: #FFA500;
-          margin: 0 auto 20px;
-          border-radius: 2px;
-          box-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
-        }
-        
-        .terms-subtitle {
-          text-align: center;
-          max-width: 700px;
-          margin: 0 auto;
-          color: #2c3e50;
-          font-size: 1.2rem;
-          line-height: 1.6;
-          font-weight: 500;
-          background: rgba(255, 255, 255, 0.9);
-          padding: 15px 30px;
-          border-radius: 30px;
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 165, 0, 0.3);
-          box-shadow: 0 4px 15px rgba(255, 165, 0, 0.2);
-        }
+  .terms-page-section {
+    position: relative;
+    padding: 80px 0;
+    color: #333;
+    overflow: hidden;
+    background: #ffffff;
+    min-height: 100vh;
+  }
+  
+  /* Brush Decorations */
+  .brush-decoration {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  .top-brush {
+    top: 0;
+    transform: rotate(180deg);
+    opacity: 0.8;
+  }
+  
+  /* Painting Background Effect */
+  .painting-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  
+  .paint-layer {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.08;
+    animation: float 20s infinite linear;
+    mix-blend-mode: multiply;
+  }
+  
+  .paint-layer-1 {
+    width: 500px;
+    height: 500px;
+    background: #FFA500;
+    top: -200px;
+    left: -100px;
+    animation-delay: 0s;
+  }
+  
+  .paint-layer-2 {
+    width: 600px;
+    height: 600px;
+    background: #FFA500;
+    top: 50%;
+    right: -200px;
+    transform: translateY(-50%);
+    animation-delay: -5s;
+    animation-direction: reverse;
+  }
+  
+  .paint-layer-3 {
+    width: 400px;
+    height: 400px;
+    background: #FFA500;
+    bottom: -150px;
+    left: 30%;
+    animation-delay: -10s;
+  }
+  
+  .paint-layer-4 {
+    width: 300px;
+    height: 300px;
+    background: #FFA500;
+    top: 20%;
+    left: 40%;
+    animation-delay: -15s;
+    animation-direction: reverse;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(20px, 20px) rotate(90deg);
+    }
+    50% {
+      transform: translate(0, 40px) rotate(180deg);
+    }
+    75% {
+      transform: translate(-20px, 20px) rotate(270deg);
+    }
+    100% {
+      transform: translate(0, 0) rotate(360deg);
+    }
+  }
+  
+  /* Header */
+  .terms-header {
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+  }
+  
+  .back-btn:hover {
+    background: #1a252f;
+    transform: translateX(-3px);
+  }
+  
+  .terms-title-section {
+    text-align: center;
+  }
+  
+  .terms-header-divider {
+    width: 100px;
+    height: 4px;
+    background: #FFA500;
+    margin: 0 auto 20px;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
+  }
+  
+  .terms-subtitle {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+    color: #2c3e50;
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px 30px;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 165, 0, 0.2);
+  }
         
         /* Main Container */
         .terms-container {

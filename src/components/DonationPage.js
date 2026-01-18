@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { FaCheck, FaRupeeSign, FaShieldAlt, FaLock, FaReceipt, FaUserCheck, FaTimes, FaHandHoldingHeart } from 'react-icons/fa';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { 
+  FaCheck, FaRupeeSign, FaShieldAlt, FaLock, FaReceipt, 
+  FaUserCheck, FaTimes, FaHandHoldingHeart, FaSpinner,
+  FaExclamationTriangle, FaInfoCircle, FaCreditCard,
+  FaArrowLeft, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt,
+  FaPhone, FaEnvelope, FaUser, FaIdCard, FaHome
+} from 'react-icons/fa';
+import axios from 'axios';
 
-// Import shared components
-import Header from './Header';
-import Footer from './Footer';
-
-const DonationPage = ({ onClose }) => {
+const DonationPage = ({ onClose, onShowTerms }) => {
   const [step, setStep] = useState(1);
   const [donationAmount, setDonationAmount] = useState('');
   const [customAmount, setCustomAmount] = useState('');
@@ -27,109 +30,579 @@ const DonationPage = ({ onClose }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [citizenDeclaration, setCitizenDeclaration] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [allTermsAccepted, setAllTermsAccepted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [paymentInProgress, setPaymentInProgress] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState('');
+  const [currentOrderId, setCurrentOrderId] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
+  const [fieldTouched, setFieldTouched] = useState({});
+  
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api';
+  const razorpayLoadedRef = useRef(false);
 
-  // Reset scroll to top when donation page loads
+  // Initialize
   useEffect(() => {
     window.scrollTo(0, 0);
+    loadRazorpayScript();
+    
+    // Clean up on unmount
+    return () => {
+      if (currentOrderId) {
+        handleAbandonedOrder(currentOrderId, 'component_unmount');
+      }
+    };
   }, []);
 
-  const presetAmounts = [500, 1000, 2000, 5000];
-  const categories = [
-    { id: 'education', title: 'Support Children\'s Education', description: 'Help them stay in school' },
-    { id: 'girls-education', title: 'Girl Child Education', description: 'Help girls complete their education' },
-    { id: 'healthcare', title: 'Healthcare Access', description: 'Provide medical care to children' },
-    { id: 'nutrition', title: 'Nutrition Programs', description: 'Ensure children get proper nutrition' },
-    { id: 'women-empowerment', title: 'Women Empowerment', description: 'Empower women through skill development' },
-    { id: 'general', title: 'General Fund', description: 'Support where needed most' }
-  ];
-
-  const handleAmountSelect = (amount) => {
-    setDonationAmount(amount);
-    setCustomAmount('');
-  };
-
-  const handleCustomAmountChange = (e) => {
-    const value = e.target.value;
-    setCustomAmount(value);
-    if (value) setDonationAmount('');
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    
-    if (name === 'fullName') {
-      const sanitizedValue = value.replace(/[^a-zA-Z\s]/g, '');
-      setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+  // Load Razorpay script
+  const loadRazorpayScript = async () => {
+    try {
+      if (window.Razorpay || razorpayLoadedRef.current) {
+        return true;
+      }
+      
+      return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => {
+          console.log('Razorpay script loaded successfully');
+          razorpayLoadedRef.current = true;
+          resolve(true);
+        };
+        script.onerror = () => {
+          console.error('Failed to load Razorpay script');
+          setError('Payment gateway failed to load. Please refresh the page or check your internet connection.');
+          resolve(false);
+        };
+        document.body.appendChild(script);
+      });
+    } catch (error) {
+      console.error('Error loading Razorpay:', error);
+      return false;
     }
   };
 
-  const handlePincodeChange = (e) => {
+  // Categories
+  const categories = [
+    { id: 'education', title: 'Support Children\'s Education', description: 'Help them stay in school', icon: '📚' },
+    { id: 'girls-education', title: 'Girl Child Education', description: 'Help girls complete their education', icon: '👧' },
+    { id: 'healthcare', title: 'Healthcare Access', description: 'Provide medical care to children', icon: '🏥' },
+    { id: 'nutrition', title: 'Nutrition Programs', description: 'Ensure children get proper nutrition', icon: '🍎' },
+    { id: 'women-empowerment', title: 'Women Empowerment', description: 'Empower women through skill development', icon: '💪' },
+    { id: 'general', title: 'General Fund', description: 'Support where needed most', icon: '❤️' }
+  ];
+
+  // Preset amounts
+  const presetAmounts = [500, 1000, 2000, 5000, 10000, 50000];
+
+  // Handle amount selection
+  const handleAmountSelect = (amount) => {
+    setDonationAmount(amount);
+    setCustomAmount('');
+    setError('');
+  };
+
+  // Handle custom amount
+  const handleCustomAmountChange = (e) => {
+    const value = e.target.value;
+    if (value === '' || (parseInt(value) > 0 && parseInt(value) <= 10000000)) {
+      setCustomAmount(value);
+      if (value) setDonationAmount('');
+    }
+    setError('');
+  };
+
+  // Handle input changes with validation
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Special handling for different fields
+    let processedValue = value;
+    
+    switch (name) {
+      case 'fullName':
+        processedValue = value.replace(/[^a-zA-Z\s]/g, '');
+        break;
+      case 'mobile':
+        processedValue = value.replace(/\D/g, '').slice(0, 10);
+        break;
+      case 'email':
+        processedValue = value.toLowerCase();
+        break;
+      case 'panNumber':
+        processedValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+        break;
+      default:
+        processedValue = value;
+    }
+    
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
+    validateField(name, processedValue);
+    setError('');
+  };
+
+  // Validate individual field
+  const validateField = (name, value) => {
+    const errors = { ...formErrors };
+    
+    switch (name) {
+      case 'fullName':
+        if (!value.trim()) {
+          errors.fullName = 'Full name is required';
+        } else if (value.length < 2) {
+          errors.fullName = 'Name must be at least 2 characters';
+        } else if (value.length > 100) {
+          errors.fullName = 'Name must be less than 100 characters';
+        } else {
+          delete errors.fullName;
+        }
+        break;
+        
+      case 'email':
+        if (!value.trim()) {
+          errors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors.email = 'Please enter a valid email address';
+        } else {
+          delete errors.email;
+        }
+        break;
+        
+      case 'mobile':
+        if (!value.trim()) {
+          errors.mobile = 'Mobile number is required';
+        } else if (!/^[6-9]\d{9}$/.test(value)) {
+          errors.mobile = 'Please enter a valid 10-digit Indian mobile number';
+        } else {
+          delete errors.mobile;
+        }
+        break;
+        
+      case 'address':
+        if (!value.trim()) {
+          errors.address = 'Address is required';
+        } else {
+          delete errors.address;
+        }
+        break;
+        
+      case 'pincode':
+        if (!value.trim()) {
+          errors.pincode = 'Pincode is required';
+        } else if (!/^\d{6}$/.test(value)) {
+          errors.pincode = 'Please enter a valid 6-digit pincode';
+        } else {
+          delete errors.pincode;
+        }
+        break;
+        
+      case 'panNumber':
+        if (value && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value)) {
+          errors.panNumber = 'Please enter a valid PAN number (e.g., ABCDE1234F)';
+        } else {
+          delete errors.panNumber;
+        }
+        break;
+        
+      default:
+        break;
+    }
+    
+    setFormErrors(errors);
+  };
+
+  // Handle field blur
+  const handleFieldBlur = (e) => {
+    const { name } = e.target;
+    setFieldTouched(prev => ({ ...prev, [name]: true }));
+    validateField(name, formData[name]);
+  };
+
+  // Handle pincode change with auto-fill
+  const handlePincodeChange = async (e) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
     setFormData(prev => ({ ...prev, pincode: value }));
     
     if (value.length === 6) {
-      const mockCityState = {
+      // You can integrate with a pincode API here
+      // For now, using mock data
+      const mockPincodeData = {
         '785001': { city: 'Jorhat', state: 'Assam' },
         '781001': { city: 'Guwahati', state: 'Assam' },
         '110001': { city: 'New Delhi', state: 'Delhi' },
         '400001': { city: 'Mumbai', state: 'Maharashtra' },
         '700001': { city: 'Kolkata', state: 'West Bengal' },
-        '600001': { city: 'Chennai', state: 'Tamil Nadu' }
+        '600001': { city: 'Chennai', state: 'Tamil Nadu' },
+        '411057': { city: 'Pune', state: 'Maharashtra' }
       };
       
-      if (mockCityState[value]) {
+      if (mockPincodeData[value]) {
         setFormData(prev => ({
           ...prev,
-          city: mockCityState[value].city,
-          state: mockCityState[value].state
+          city: mockPincodeData[value].city,
+          state: mockPincodeData[value].state
         }));
+      } else {
+        // Reset if pincode not found
+        setFormData(prev => ({
+          ...prev,
+          city: '',
+          state: ''
+        }));
+      }
+    }
+    
+    validateField('pincode', value);
+  };
+
+  // Handle abandoned orders
+  const handleAbandonedOrder = async (orderId, reason = 'user_cancelled') => {
+    try {
+      await axios.post(`${API_BASE_URL}/donations/order-abandoned`, { 
+        orderId, 
+        reason 
+      });
+      console.log('Abandoned order logged:', orderId);
+    } catch (error) {
+      console.error('Error logging abandoned order:', error);
+    }
+  };
+
+  // Handle failed payments
+  const handleFailedPayment = async (orderId, errorDetails) => {
+    try {
+      await axios.post(`${API_BASE_URL}/donations/payment-failed`, {
+        orderId,
+        error: errorDetails
+      });
+      console.log('Failed payment logged:', orderId);
+    } catch (error) {
+      console.error('Error reporting failed payment:', error);
+    }
+  };
+
+  // Create Razorpay order in backend
+  const createRazorpayOrder = async (donationData) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await axios.post(`${API_BASE_URL}/donations/create-order`, donationData);
+      
+      if (response.data.success) {
+        setCurrentOrderId(response.data.data.orderId);
+        return response.data.data;
+      } else {
+        throw new Error(response.data.message || 'Failed to create order');
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to create payment order';
+      throw new Error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initiate Razorpay payment
+  const initiateRazorpayPayment = useCallback(async (orderData, donationData) => {
+    try {
+      const razorpayLoaded = await loadRazorpayScript();
+      if (!razorpayLoaded) {
+        throw new Error('Payment gateway not available. Please refresh the page.');
+      }
+
+      const options = {
+        key: orderData.razorpayKey || process.env.REACT_APP_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Harmonious Hands Foundation',
+        description: `Donation for ${categories.find(c => c.id === donationData.category)?.title}`,
+        order_id: orderData.orderId,
+        handler: async (response) => {
+          await verifyPayment(response, donationData);
+        },
+        prefill: {
+          name: donationData.donorDetails.fullName,
+          email: donationData.donorDetails.email,
+          contact: donationData.donorDetails.mobile
+        },
+        theme: {
+          color: '#FFA500'
+        },
+        modal: {
+          ondismiss: () => {
+            console.log('Payment modal dismissed by user');
+            setPaymentInProgress(false);
+            handleAbandonedOrder(orderData.orderId, 'modal_dismissed');
+            setCurrentOrderId(null);
+          }
+        },
+        config: {
+          display: {
+            blocks: {
+              banks: {
+                name: "Pay via Net Banking",
+                instruments: [
+                  {
+                    method: "netbanking",
+                    banks: ["HDFC", "ICICI", "SBI", "AXIS", "KOTAK"]
+                  }
+                ]
+              },
+              upi: {
+                name: "Pay via UPI",
+                instruments: [
+                  {
+                    method: "upi"
+                  }
+                ]
+              },
+              card: {
+                name: "Pay via Card",
+                instruments: [
+                  {
+                    method: "card"
+                  }
+                ]
+              },
+              wallets: {
+                name: "Pay via Wallets",
+                instruments: [
+                  {
+                    method: "wallet"
+                  }
+                ]
+              }
+            },
+            sequence: ["block.banks", "block.upi", "block.card", "block.wallets"],
+            preferences: {
+              show_default_blocks: false
+            }
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      
+      // Handle payment events
+      rzp.on('payment.failed', (response) => {
+        console.error('Payment failed:', response.error);
+        setPaymentInProgress(false);
+        setCurrentOrderId(null);
+        
+        const errorMsg = response.error?.description || 'Payment failed. Please try again.';
+        const errorCode = response.error?.code || 'PAYMENT_FAILED';
+        
+        setError(`Payment failed: ${errorMsg}`);
+        setPaymentStatus('failed');
+        
+        // Notify backend about failed payment
+        handleFailedPayment(orderData.orderId, {
+          code: errorCode,
+          description: errorMsg,
+          reason: response.error?.reason
+        });
+      });
+      
+      rzp.on('payment.cancelled', () => {
+        console.log('Payment cancelled by user');
+        setPaymentInProgress(false);
+        setCurrentOrderId(null);
+        setPaymentStatus('cancelled');
+        handleAbandonedOrder(orderData.orderId, 'user_cancelled');
+      });
+      
+      rzp.open();
+      setPaymentInProgress(true);
+      setPaymentStatus('processing');
+      
+    } catch (error) {
+      console.error('Error opening Razorpay:', error);
+      setPaymentInProgress(false);
+      setCurrentOrderId(null);
+      setError('Failed to initialize payment gateway. Please try again.');
+      setPaymentStatus('error');
+    }
+  }, []);
+
+  // Verify payment after success
+  const verifyPayment = async (paymentResponse, donationData) => {
+    try {
+      setLoading(true);
+      setPaymentStatus('verifying');
+      
+      const verificationData = {
+        razorpayPaymentId: paymentResponse.razorpay_payment_id,
+        razorpayOrderId: paymentResponse.razorpay_order_id,
+        razorpaySignature: paymentResponse.razorpay_signature,
+        donationDetails: donationData
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/donations/verify-payment`, verificationData);
+      
+      if (response.data.success) {
+        setCurrentOrderId(null);
+        setPaymentStatus('success');
+        setSuccess(true);
+        
+        // Show success message
+        setTimeout(() => {
+          alert('Thank you for your donation! 🎉\n\n' +
+                `Payment ID: ${response.data.paymentId}\n` +
+                `Receipt: ${response.data.receipt}\n` +
+                `Amount: ₹${response.data.amount}\n\n` +
+                'You will receive a tax receipt via email shortly.');
+          
+          if (onClose) onClose();
+        }, 500);
+        
+      } else {
+        throw new Error(response.data.message || 'Payment verification failed');
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      setCurrentOrderId(null);
+      setPaymentStatus('verification_failed');
+      
+      const errorMsg = error.response?.data?.message || error.message || 'Payment verification failed';
+      setError(`Payment verification failed: ${errorMsg}`);
+      
+      alert(`Payment verification failed.\n\nPlease contact support with your payment ID: ${paymentResponse.razorpay_payment_id}`);
+    } finally {
+      setLoading(false);
+      setPaymentInProgress(false);
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (step === 1) {
+      // Validate step 1
+      if (!donationAmount && !customAmount) {
+        setError('Please select or enter a donation amount');
+        return;
+      }
+      
+      const finalAmount = donationAmount || customAmount;
+      if (finalAmount < 1) {
+        setError('Amount must be at least ₹1');
+        return;
+      }
+      
+      if (finalAmount > 10000000) {
+        setError('Amount cannot exceed ₹1,00,00,000');
+        return;
+      }
+      
+      setStep(2);
+      setError('');
+      
+    } else {
+      // Validate step 2
+      if (!isStep2Valid()) {
+        setError('Please fill all required fields and accept terms');
+        return;
+      }
+      
+      try {
+        setError('');
+        setCurrentOrderId(null);
+        setPaymentStatus('');
+
+        const finalAmount = donationAmount || customAmount;
+        
+        // Prepare donation data
+        const donationData = {
+          amount: Math.round(finalAmount * 100), // Convert to paise
+          currency: 'INR',
+          receipt: `receipt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          donorDetails: formData,
+          category: category,
+          donationType: donationType,
+          termsAccepted: termsAccepted,
+          citizenDeclaration: citizenDeclaration
+        };
+
+        // Step 1: Create order in backend
+        const orderData = await createRazorpayOrder(donationData);
+        
+        // Step 2: Initiate Razorpay payment
+        await initiateRazorpayPayment(orderData, donationData);
+        
+      } catch (error) {
+        console.error('Payment initiation error:', error);
+        setError(error.message || 'Failed to initiate payment. Please try again.');
+        setPaymentInProgress(false);
+        setPaymentStatus('initiation_failed');
       }
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!donationAmount && !customAmount) {
-      alert('Please select or enter a donation amount');
-      return;
-    }
-
-    if (step === 1) {
-      setStep(2);
-    } else {
-      const finalAmount = donationAmount || customAmount;
-      alert(`Thank you for your donation of ₹${finalAmount}! You will receive a tax receipt shortly.`);
-      if (onClose) onClose();
-    }
-  };
-
+  // Validate step 2
   const isStep2Valid = () => {
-    return (
-      formData.fullName.trim() &&
-      formData.email.trim() &&
-      formData.mobile.trim().length === 10 &&
-      formData.address.trim() &&
-      formData.pincode.trim().length === 6 &&
-      termsAccepted &&
-      citizenDeclaration
-    );
+    const requiredFields = ['fullName', 'email', 'mobile', 'address', 'pincode'];
+    const hasAllRequiredFields = requiredFields.every(field => formData[field]?.trim());
+    
+    const hasNoErrors = Object.keys(formErrors).length === 0;
+    const hasValidMobile = formData.mobile?.length === 10;
+    const hasValidPincode = formData.pincode?.length === 6;
+    
+    return hasAllRequiredFields && hasNoErrors && hasValidMobile && hasValidPincode && 
+           termsAccepted && citizenDeclaration;
   };
 
-  const handleAcceptAllTerms = () => {
-    setAllTermsAccepted(true);
-    setTermsAccepted(true);
-    setShowTermsModal(false);
+  // Calculate total amount
+  const getTotalAmount = () => {
+    return donationAmount || customAmount || 0;
+  };
+
+  // Get selected category title
+  const getSelectedCategoryTitle = () => {
+    const selectedCat = categories.find(c => c.id === category);
+    return selectedCat ? selectedCat.title : 'Unknown';
+  };
+
+  // Format amount for display
+  const formatAmount = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Handle back button
+  const handleBack = () => {
+    if (step === 2) {
+      if (currentOrderId) {
+        handleAbandonedOrder(currentOrderId, 'user_went_back');
+        setCurrentOrderId(null);
+      }
+      setStep(1);
+    }
+  };
+
+  // Handle cancel
+  const handleCancel = () => {
+    if (currentOrderId) {
+      handleAbandonedOrder(currentOrderId, 'user_cancelled');
+    }
+    if (onClose) onClose();
   };
 
   // Terms Modal Component
   const TermsModal = () => (
     <div className="terms-modal-overlay" onClick={() => setShowTermsModal(false)}>
       <div className="terms-modal-content" onClick={e => e.stopPropagation()}>
-        <button className="terms-modal-close" onClick={() => setShowTermsModal(false)}>
+        <button 
+          className="terms-modal-close" 
+          onClick={() => setShowTermsModal(false)}
+          aria-label="Close terms modal"
+        >
           <FaTimes />
         </button>
         
@@ -137,79 +610,35 @@ const DonationPage = ({ onClose }) => {
         
         <div className="terms-modal-scroll">
           <div className="terms-section">
-            <h4>1. General Terms</h4>
+            <h4>Donation Terms</h4>
             <p>
-              By making a donation to Harmonious Hands Foundation through our website or via any other 
-              payment method, you agree to the following terms and conditions. We encourage all donors to 
-              read these terms carefully before proceeding with any contribution.
+              1. All donations made to Harmonious Hands Foundation are voluntary and non-refundable.
+            </p>
+            <p>
+              2. Donations are eligible for tax exemption under Section 80G of the Income Tax Act, 1961.
+            </p>
+            <p>
+              3. Tax receipts will be issued within 15 working days of the donation.
             </p>
           </div>
           
           <div className="terms-section">
-            <h4>2. Donation Policy</h4>
-            <ul>
-              <li>All donations are made voluntarily and must be used only for lawful, ethical purposes.</li>
-              <li>Donations will be used to support our various programs in education, healthcare, women's empowerment, cultural preservation, sustainable development, and social welfare.</li>
-              <li>Donations can be made in Indian Rupees (INR).</li>
-            </ul>
-          </div>
-          
-          <div className="terms-section">
-            <h4>3. Refund Policy</h4>
-            <ul>
-              <li>All donations are non-refundable. Once a donation is confirmed, it is considered final.</li>
-              <li>Refunds may only be issued in cases of technical error.</li>
-              <li>To request a resolution, please email us at hhfoundation24@gmail.com within 7 days.</li>
-            </ul>
-          </div>
-          
-          <div className="terms-section">
-            <h4>4. Tax Deductibility</h4>
-            <ul>
-              <li>Harmonious Hands Foundation is a registered Section 8 non-profit company.</li>
-              <li>Donations are eligible for tax exemption under Section 80G of the Income Tax Act.</li>
-              <li>Upon successful donation, you will receive an official receipt via email.</li>
-            </ul>
-          </div>
-          
-          <div className="terms-section">
-            <h4>5. Privacy Policy</h4>
+            <h4>Privacy Policy</h4>
             <p>
-              We are committed to safeguarding your privacy. Your personal and payment information 
-              will be handled with strict confidentiality and used only for purposes related to your 
-              donation.
+              1. Your personal information is collected solely for the purpose of issuing tax receipts and maintaining donor records.
+            </p>
+            <p>
+              2. We do not share your personal information with third parties without your consent.
             </p>
           </div>
           
           <div className="terms-section">
-            <h4>6. Security</h4>
+            <h4>Payment Security</h4>
             <p>
-              Our website uses SSL encryption and secure payment gateways to protect your sensitive 
-              data during transactions.
+              1. All payments are processed through Razorpay, a PCI-DSS compliant payment gateway.
             </p>
-          </div>
-          
-          <div className="terms-section">
-            <h4>7. Use of Donations</h4>
-            <ul>
-              <li>Donations will be used at the discretion of Harmonious Hands Foundation to further our mission.</li>
-              <li>While you may specify a preference, the Foundation reserves the right to allocate funds where most urgently needed.</li>
-            </ul>
-          </div>
-          
-          <div className="terms-section">
-            <h4>8. Changes to these Terms</h4>
             <p>
-              Harmonious Hands Foundation reserves the right to update or modify these terms and 
-              conditions at any time.
-            </p>
-          </div>
-          
-          <div className="terms-section">
-            <h4>9. Governing Law</h4>
-            <p>
-              These terms are governed by and construed in accordance with the laws of India, 
-              particularly within the jurisdiction of Assam.
+              2. We do not store your payment card details.
             </p>
           </div>
         </div>
@@ -218,8 +647,11 @@ const DonationPage = ({ onClose }) => {
           <button className="btn btn-secondary" onClick={() => setShowTermsModal(false)}>
             Cancel
           </button>
-          <button className="btn btn-primary" onClick={handleAcceptAllTerms}>
-            I Accept All Terms
+          <button className="btn btn-primary" onClick={() => {
+            setTermsAccepted(true);
+            setShowTermsModal(false);
+          }}>
+            I Accept Terms
           </button>
         </div>
       </div>
@@ -228,22 +660,20 @@ const DonationPage = ({ onClose }) => {
 
   return (
     <div className="donation-page">
-      {/* Use the shared Header component with onClose for navigation */}
-      <Header onDonateClick={onClose} isDonationPage={true} />
-      
       {/* Main Content */}
       <main className="donation-main">
         <section className="donation-page-section">
-          {/* Top Brush Decoration */}
+          {/* Brush Decoration */}
           <div 
             className="brush-decoration top-brush"
             style={{ 
               backgroundImage: `url(${require('../assets/brush-top-alt.jpeg')})`
             }}
+            aria-hidden="true"
           />
           
           {/* Background Painting Effect */}
-          <div className="painting-background">
+          <div className="painting-background" aria-hidden="true">
             <div className="paint-layer paint-layer-1"></div>
             <div className="paint-layer paint-layer-2"></div>
             <div className="paint-layer paint-layer-3"></div>
@@ -251,14 +681,90 @@ const DonationPage = ({ onClose }) => {
           </div>
           
           <div className="container">
-            {/* Section Header - Reduced margin for less space */}
+            {/* Section Header */}
             <div className="donation-header-section">
-              <h2 className="section-title">Donate & Save Tax</h2>
+              <h1 className="section-title">Donate & Save Tax</h1>
               <div className="donation-header-divider"></div>
               <p className="donation-subtitle">
                 Your generosity creates lasting change in communities across Assam
               </p>
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="error-message" role="alert">
+                <FaExclamationTriangle /> 
+                <div className="error-content">
+                  <strong>Error:</strong> {error}
+                  {paymentStatus === 'verification_failed' && (
+                    <p className="error-note">
+                      Please contact support with your payment ID for assistance.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {success && (
+              <div className="success-message" role="alert">
+                <FaCheck /> 
+                <div className="success-content">
+                  <strong>Success!</strong> Your donation has been processed successfully.
+                  <p className="success-note">
+                    You will receive a tax receipt via email shortly.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Status Indicator */}
+            {paymentStatus && !success && (
+              <div className={`payment-status payment-status-${paymentStatus}`}>
+                {paymentStatus === 'processing' && (
+                  <>
+                    <FaSpinner className="spinner" /> 
+                    Processing payment...
+                  </>
+                )}
+                {paymentStatus === 'verifying' && (
+                  <>
+                    <FaSpinner className="spinner" /> 
+                    Verifying payment...
+                  </>
+                )}
+                {paymentStatus === 'failed' && (
+                  <>
+                    <FaExclamationTriangle /> 
+                    Payment failed
+                  </>
+                )}
+                {paymentStatus === 'cancelled' && (
+                  <>
+                    <FaTimes /> 
+                    Payment cancelled
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Loading Overlay */}
+            {(paymentInProgress || loading) && (
+              <div className="payment-overlay">
+                <div className="payment-loading">
+                  <FaSpinner className="spinner" />
+                  <p>
+                    {paymentInProgress ? 'Processing payment...' : 'Creating order...'}
+                  </p>
+                  <p className="payment-note">
+                    Please do not close this window or refresh the page
+                  </p>
+                  <div className="payment-progress">
+                    <div className="progress-bar"></div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="donation-container">
               {/* Left Column - Impact Info */}
@@ -268,11 +774,11 @@ const DonationPage = ({ onClose }) => {
                     <div className="impact-icon">
                       <FaHandHoldingHeart />
                     </div>
-                    <h3>Your Impact Matters</h3>
+                    <h2>Your Impact Matters</h2>
                   </div>
                   <div className="impact-content">
                     <p>
-                      At Harmonious Hands Foundation, we believe that every hand joined in generosity becomes a step toward dignity, equity, and lasting change. Your contribution helps us uplift rural communities, educate children, empower women, protect cultural heritage, provide healthcare, and build sustainable livelihoods.
+                      At Harmonious Hands Foundation, we believe that every hand joined in generosity becomes a step toward dignity, equity, and lasting change.
                     </p>
                     
                     <div className="impact-stats">
@@ -295,7 +801,7 @@ const DonationPage = ({ onClose }) => {
                         <FaLock className="security-icon" />
                         <div>
                           <h4>Secure Donation</h4>
-                          <p>SSL encrypted payment processing</p>
+                          <p>PCI-DSS compliant payment processing</p>
                         </div>
                       </div>
                       <div className="security-item">
@@ -319,7 +825,7 @@ const DonationPage = ({ onClose }) => {
 
               {/* Right Column - Donation Form */}
               <div className="donation-form-column">
-                <form onSubmit={handleSubmit} className="donation-form-card">
+                <form onSubmit={handleSubmit} className="donation-form-card" noValidate>
                   {/* Step Indicator */}
                   <div className="step-indicator">
                     <div className={`step ${step === 1 ? 'active' : ''}`}>
@@ -337,21 +843,15 @@ const DonationPage = ({ onClose }) => {
                   {step === 1 && (
                     <>
                       <div className="form-section">
-                        <h3 className="form-section-title">Citizenship *</h3>
+                        <h3 className="form-section-title">Citizenship <span className="required">*</span></h3>
                         <div className="citizenship-options">
                           <button
                             type="button"
                             className={`citizenship-btn ${citizenship === 'indian' ? 'active' : ''}`}
                             onClick={() => setCitizenship('indian')}
+                            disabled={loading || paymentInProgress}
                           >
                             <FaUserCheck /> Indian Citizen
-                          </button>
-                          <button
-                            type="button"
-                            className={`citizenship-btn ${citizenship === 'foreign' ? 'active' : ''}`}
-                            onClick={() => setCitizenship('foreign')}
-                          >
-                            Foreign Citizen/NRI
                           </button>
                         </div>
                         <p className="form-note">
@@ -360,27 +860,29 @@ const DonationPage = ({ onClose }) => {
                       </div>
 
                       <div className="form-section">
-                        <h3 className="form-section-title">Donation Type</h3>
+                        <h3 className="form-section-title">Donation Type <span className="required">*</span></h3>
                         <div className="donation-type-options">
                           <button
                             type="button"
                             className={`type-btn ${donationType === 'once' ? 'active' : ''}`}
                             onClick={() => setDonationType('once')}
+                            disabled={loading || paymentInProgress}
                           >
-                            Give Once
+                            <FaCalendarAlt /> Give Once
                           </button>
                           <button
                             type="button"
                             className={`type-btn ${donationType === 'monthly' ? 'active' : ''}`}
                             onClick={() => setDonationType('monthly')}
+                            disabled={loading || paymentInProgress}
                           >
-                            Give Monthly
+                            <FaCalendarAlt /> Give Monthly
                           </button>
                         </div>
                       </div>
 
                       <div className="form-section">
-                        <h3 className="form-section-title">Choose Amount (₹)</h3>
+                        <h3 className="form-section-title">Choose Amount (₹) <span className="required">*</span></h3>
                         <div className="amount-options-grid">
                           {presetAmounts.map((amount) => (
                             <button
@@ -388,6 +890,7 @@ const DonationPage = ({ onClose }) => {
                               type="button"
                               className={`amount-option-btn ${donationAmount === amount ? 'active' : ''}`}
                               onClick={() => handleAmountSelect(amount)}
+                              disabled={loading || paymentInProgress}
                             >
                               <FaRupeeSign /> {amount.toLocaleString('en-IN')}
                             </button>
@@ -407,14 +910,21 @@ const DonationPage = ({ onClose }) => {
                             placeholder="Enter custom amount"
                             value={customAmount}
                             onChange={handleCustomAmountChange}
+                            onBlur={handleFieldBlur}
                             min="1"
                             step="1"
+                            max="10000000"
+                            disabled={loading || paymentInProgress}
+                            aria-label="Custom donation amount"
                           />
                         </div>
+                        {customAmount && customAmount < 100 && (
+                          <p className="form-error">Minimum donation amount is ₹100</p>
+                        )}
                       </div>
 
                       <div className="form-section">
-                        <h3 className="form-section-title">Choose Where to Help</h3>
+                        <h3 className="form-section-title">Choose Where to Help <span className="required">*</span></h3>
                         <div className="category-options-grid">
                           {categories.map((cat) => (
                             <label key={cat.id} className="category-option">
@@ -424,8 +934,11 @@ const DonationPage = ({ onClose }) => {
                                 value={cat.id}
                                 checked={category === cat.id}
                                 onChange={() => setCategory(cat.id)}
+                                disabled={loading || paymentInProgress}
+                                aria-label={cat.title}
                               />
                               <div className="category-content">
+                                <span className="category-icon">{cat.icon}</span>
                                 <h4>{cat.title}</h4>
                                 <p>{cat.description}</p>
                               </div>
@@ -444,8 +957,10 @@ const DonationPage = ({ onClose }) => {
                         
                         <div className="form-group">
                           <label htmlFor="fullName">
-                            Full Name * 
-                            <span className="form-hint">(Special characters not allowed)</span>
+                            <FaUser /> Full Name <span className="required">*</span>
+                            {fieldTouched.fullName && formErrors.fullName && (
+                              <span className="field-error">{formErrors.fullName}</span>
+                            )}
                           </label>
                           <input
                             type="text"
@@ -453,73 +968,116 @@ const DonationPage = ({ onClose }) => {
                             name="fullName"
                             value={formData.fullName}
                             onChange={handleInputChange}
+                            onBlur={handleFieldBlur}
                             placeholder="Enter your full name"
                             required
+                            disabled={loading || paymentInProgress}
+                            aria-invalid={!!formErrors.fullName}
+                            aria-describedby={formErrors.fullName ? "fullName-error" : undefined}
                           />
                         </div>
 
                         <div className="form-group">
-                          <label htmlFor="dob">Date of Birth</label>
+                          <label htmlFor="dob">
+                            <FaCalendarAlt /> Date of Birth
+                          </label>
                           <input
                             type="date"
                             id="dob"
                             name="dob"
                             value={formData.dob}
                             onChange={handleInputChange}
+                            onBlur={handleFieldBlur}
+                            max={new Date().toISOString().split('T')[0]}
+                            disabled={loading || paymentInProgress}
+                            aria-label="Date of birth"
                           />
                         </div>
 
                         <div className="form-row">
                           <div className="form-group half">
-                            <label htmlFor="email">Email *</label>
+                            <label htmlFor="email">
+                              <FaEnvelope /> Email <span className="required">*</span>
+                              {fieldTouched.email && formErrors.email && (
+                                <span className="field-error">{formErrors.email}</span>
+                              )}
+                            </label>
                             <input
                               type="email"
                               id="email"
                               name="email"
                               value={formData.email}
                               onChange={handleInputChange}
+                              onBlur={handleFieldBlur}
                               required
+                              disabled={loading || paymentInProgress}
+                              aria-invalid={!!formErrors.email}
                             />
                           </div>
                           <div className="form-group half">
-                            <label htmlFor="mobile">Mobile Number *</label>
+                            <label htmlFor="mobile">
+                              <FaPhone /> Mobile Number <span className="required">*</span>
+                              {fieldTouched.mobile && formErrors.mobile && (
+                                <span className="field-error">{formErrors.mobile}</span>
+                              )}
+                            </label>
                             <input
                               type="tel"
                               id="mobile"
                               name="mobile"
                               value={formData.mobile}
                               onChange={handleInputChange}
+                              onBlur={handleFieldBlur}
                               pattern="[0-9]{10}"
                               maxLength="10"
                               required
+                              disabled={loading || paymentInProgress}
+                              aria-invalid={!!formErrors.mobile}
                             />
                           </div>
                         </div>
 
                         <div className="form-group">
-                          <label htmlFor="address">Address *</label>
+                          <label htmlFor="address">
+                            <FaHome /> Address <span className="required">*</span>
+                            {fieldTouched.address && formErrors.address && (
+                              <span className="field-error">{formErrors.address}</span>
+                            )}
+                          </label>
                           <textarea
                             id="address"
                             name="address"
                             value={formData.address}
                             onChange={handleInputChange}
+                            onBlur={handleFieldBlur}
                             rows="3"
                             required
+                            disabled={loading || paymentInProgress}
+                            aria-invalid={!!formErrors.address}
+                            placeholder="Enter your complete address"
                           />
                         </div>
 
                         <div className="form-row">
                           <div className="form-group half">
-                            <label htmlFor="pincode">Pincode *</label>
+                            <label htmlFor="pincode">
+                              <FaMapMarkerAlt /> Pincode <span className="required">*</span>
+                              {fieldTouched.pincode && formErrors.pincode && (
+                                <span className="field-error">{formErrors.pincode}</span>
+                              )}
+                            </label>
                             <input
                               type="text"
                               id="pincode"
                               name="pincode"
                               value={formData.pincode}
                               onChange={handlePincodeChange}
+                              onBlur={handleFieldBlur}
                               maxLength="6"
                               pattern="[0-9]{6}"
                               required
+                              disabled={loading || paymentInProgress}
+                              aria-invalid={!!formErrors.pincode}
                             />
                             <small className="form-hint">Entering Pincode will autofill City and State</small>
                           </div>
@@ -530,8 +1088,9 @@ const DonationPage = ({ onClose }) => {
                               id="city"
                               name="city"
                               value={formData.city}
-                              onChange={handleInputChange}
                               readOnly
+                              disabled={loading || paymentInProgress}
+                              aria-label="City (auto-filled from pincode)"
                             />
                           </div>
                         </div>
@@ -544,8 +1103,9 @@ const DonationPage = ({ onClose }) => {
                               id="state"
                               name="state"
                               value={formData.state}
-                              onChange={handleInputChange}
                               readOnly
+                              disabled={loading || paymentInProgress}
+                              aria-label="State (auto-filled from pincode)"
                             />
                           </div>
                           <div className="form-group half">
@@ -556,25 +1116,35 @@ const DonationPage = ({ onClose }) => {
                               name="country"
                               value={formData.country}
                               readOnly
+                              disabled={loading || paymentInProgress}
+                              aria-label="Country"
                             />
                           </div>
                         </div>
 
                         <div className="form-group">
-                          <label htmlFor="panNumber">PAN Number</label>
+                          <label htmlFor="panNumber">
+                            <FaIdCard /> PAN Number
+                            {fieldTouched.panNumber && formErrors.panNumber && (
+                              <span className="field-error">{formErrors.panNumber}</span>
+                            )}
+                          </label>
                           <input
                             type="text"
                             id="panNumber"
                             name="panNumber"
                             value={formData.panNumber}
                             onChange={handleInputChange}
-                            placeholder="Enter 10-digit PAN"
+                            onBlur={handleFieldBlur}
+                            placeholder="Enter 10-digit PAN (e.g., ABCDE1234F)"
                             maxLength="10"
-                            pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
+                            pattern="[A-Z]{5}[0-9]{4}[A-Z]"
+                            disabled={loading || paymentInProgress}
+                            aria-invalid={!!formErrors.panNumber}
                           />
-                          <small className="form-warning">
-                            Please note that if you do not provide your PAN Number, you will not be able to claim 50% tax exemption u/s 80G in India
-                          </small>
+                          <div className="form-warning">
+                            <FaExclamationTriangle /> Please note: Without PAN Number, you cannot claim 50% tax exemption u/s 80G
+                          </div>
                         </div>
 
                         <div className="terms-section">
@@ -582,16 +1152,20 @@ const DonationPage = ({ onClose }) => {
                             <input
                               type="checkbox"
                               checked={termsAccepted}
-                              onChange={(e) => {
-                                setTermsAccepted(e.target.checked);
-                                if (!e.target.checked) {
-                                  setAllTermsAccepted(false);
-                                }
-                              }}
+                              onChange={(e) => setTermsAccepted(e.target.checked)}
                               required
+                              disabled={loading || paymentInProgress}
+                              aria-required="true"
                             />
                             <span className="checkbox-text">
-                              I agree to the <button type="button" className="terms-link" onClick={() => setShowTermsModal(true)}>Terms and Conditions</button> and confirm that information is being collected to comply with government regulations and shall be treated as confidential.
+                              I agree to the <button 
+                                type="button" 
+                                className="terms-link"
+                                onClick={() => setShowTermsModal(true)}
+                                disabled={loading || paymentInProgress}
+                              >
+                                Terms and Conditions
+                              </button> and confirm that information is being collected to comply with government regulations.
                             </span>
                           </label>
 
@@ -601,21 +1175,24 @@ const DonationPage = ({ onClose }) => {
                               checked={citizenDeclaration}
                               onChange={(e) => setCitizenDeclaration(e.target.checked)}
                               required
+                              disabled={loading || paymentInProgress}
+                              aria-required="true"
                             />
                             <span className="checkbox-text">
-                              I hereby declare that I am a citizen of India, making this donation out of my own funds. The information provided is true and correct to the best of my knowledge.
+                              I hereby declare that I am a citizen of India, making this donation out of my own funds. The information provided is true and correct.
                             </span>
                           </label>
                         </div>
 
                         <div className="payment-methods-section">
-                          <h4>We accept all major payment methods</h4>
+                          <h4><FaCreditCard /> We accept all major payment methods</h4>
                           <div className="payment-methods">
                             <span className="payment-method">RuPay</span>
                             <span className="payment-method">VISA</span>
                             <span className="payment-method">Mastercard</span>
                             <span className="payment-method">UPI</span>
                             <span className="payment-method">Net Banking</span>
+                            <span className="payment-method">Wallet</span>
                           </div>
                         </div>
                       </div>
@@ -624,22 +1201,55 @@ const DonationPage = ({ onClose }) => {
 
                   {/* Navigation Buttons */}
                   <div className="form-navigation">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={handleCancel}
+                      disabled={paymentInProgress}
+                    >
+                      <FaTimes /> Cancel
+                    </button>
+                    
                     {step === 2 && (
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        onClick={() => setStep(1)}
+                        onClick={handleBack}
+                        disabled={loading || paymentInProgress}
                       >
-                        Back
+                        <FaArrowLeft /> Back
                       </button>
                     )}
                     
                     <button
                       type="submit"
                       className="btn btn-primary"
-                      disabled={step === 2 && !isStep2Valid()}
+                      disabled={
+                        (step === 1 && !donationAmount && !customAmount) ||
+                        (step === 2 && !isStep2Valid()) ||
+                        loading || 
+                        paymentInProgress ||
+                        success
+                      }
+                      aria-busy={loading || paymentInProgress}
                     >
-                      {step === 1 ? 'Continue to Donor Details' : 'Continue to Payment'}
+                      {loading ? (
+                        <>
+                          <FaSpinner className="spinner" /> Processing...
+                        </>
+                      ) : paymentInProgress ? (
+                        <>
+                          <FaSpinner className="spinner" /> Payment in Progress...
+                        </>
+                      ) : step === 1 ? (
+                        <>
+                          Continue to Donor Details <FaArrowRight />
+                        </>
+                      ) : (
+                        <>
+                          Proceed to Payment <FaCreditCard />
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
@@ -650,16 +1260,20 @@ const DonationPage = ({ onClose }) => {
                   <div className="summary-item">
                     <span>Amount:</span>
                     <span className="donation-amount">
-                      ₹{(donationAmount || customAmount || 0).toLocaleString('en-IN')}
+                      {formatAmount(getTotalAmount())}
                     </span>
                   </div>
                   <div className="summary-item">
                     <span>Type:</span>
-                    <span className="donation-type">{donationType === 'once' ? 'One-time' : 'Monthly'}</span>
+                    <span className="donation-type">
+                      {donationType === 'once' ? 'One-time' : 'Monthly'}
+                    </span>
                   </div>
                   <div className="summary-item">
                     <span>Category:</span>
-                    <span className="donation-category">{categories.find(c => c.id === category)?.title}</span>
+                    <span className="donation-category">
+                      {getSelectedCategoryTitle()}
+                    </span>
                   </div>
                   <div className="summary-item">
                     <span>Tax Benefit:</span>
@@ -667,8 +1281,33 @@ const DonationPage = ({ onClose }) => {
                       <FaCheck /> Eligible for 80G
                     </span>
                   </div>
+                  {formData.panNumber ? (
+                    <div className="summary-item">
+                      <span>PAN Provided:</span>
+                      <span className="pan-badge">
+                        <FaCheck /> {formData.panNumber}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="summary-item warning">
+                      <span>PAN:</span>
+                      <span className="pan-warning">
+                        <FaExclamationTriangle /> Not provided
+                      </span>
+                    </div>
+                  )}
                   <div className="security-badge">
                     <FaLock /> 100% Secure Donation
+                  </div>
+                  <div className="razorpay-badge">
+                    <img 
+                      src="https://razorpay.com/assets/razorpay-glyph.svg" 
+                      alt="Razorpay"
+                      className="razorpay-logo"
+                      width="24"
+                      height="24"
+                    />
+                    <span>Powered by Razorpay</span>
                   </div>
                 </div>
               </div>
@@ -677,29 +1316,277 @@ const DonationPage = ({ onClose }) => {
         </section>
       </main>
 
-      {/* Use the shared Footer component */}
-      <Footer onDonateClick={onClose} isDonationPage={true} />
-
       {/* Terms Modal */}
       {showTermsModal && <TermsModal />}
 
+      {/* Styles */}
       <style jsx>{`
         .donation-page {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
           background: #ffffff;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
         
-        /* Main Content - REDUCED margin to remove extra space */
         .donation-main {
           flex: 1;
-          margin-top: 30px; /* Reduced from 110px to 30px */
+          margin-top: -80px;
         }
+        
+        /* Error and Success Messages */
+        .error-message {
+          background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%);
+          color: #721c24;
+          padding: 16px 20px;
+          border-radius: 10px;
+          margin-bottom: 25px;
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
+          border: 2px solid #f5c6cb;
+          animation: slideIn 0.3s ease;
+          box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+        }
+        
+        .error-content {
+          flex: 1;
+        }
+        
+        .error-note {
+          margin-top: 8px;
+          font-size: 0.9rem;
+          opacity: 0.9;
+        }
+        
+        .success-message {
+          background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+          color: #155724;
+          padding: 16px 20px;
+          border-radius: 10px;
+          margin-bottom: 25px;
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
+          border: 2px solid #c3e6cb;
+          animation: slideIn 0.3s ease;
+          box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);
+        }
+        
+        .success-content {
+          flex: 1;
+        }
+        
+        .success-note {
+          margin-top: 8px;
+          font-size: 0.9rem;
+          opacity: 0.9;
+        }
+        
+        /* Payment Status */
+        .payment-status {
+          padding: 12px 20px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-weight: 600;
+          animation: pulse 2s infinite;
+        }
+        
+        .payment-status-processing,
+        .payment-status-verifying {
+          background: #fff3cd;
+          color: #856404;
+          border: 2px solid #ffeaa7;
+        }
+        
+        .payment-status-failed {
+          background: #f8d7da;
+          color: #721c24;
+          border: 2px solid #f5c6cb;
+        }
+        
+        .payment-status-cancelled {
+          background: #e2e3e5;
+          color: #383d41;
+          border: 2px solid #d6d8db;
+        }
+        
+        .payment-status-success {
+          background: #d4edda;
+          color: #155724;
+          border: 2px solid #c3e6cb;
+        }
+        
+        /* Loading Overlay */
+        .payment-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.85);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          backdrop-filter: blur(4px);
+        }
+        
+        .payment-loading {
+          background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+          padding: 40px;
+          border-radius: 15px;
+          text-align: center;
+          max-width: 400px;
+          width: 90%;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          animation: fadeIn 0.3s ease;
+        }
+        
+        .payment-loading .spinner {
+          font-size: 48px;
+          color: #FFA500;
+          animation: spin 1s linear infinite;
+          margin-bottom: 20px;
+        }
+        
+        .payment-loading p {
+          font-size: 1.1rem;
+          color: #333;
+          margin: 10px 0;
+          font-weight: 600;
+        }
+        
+        .payment-note {
+          font-size: 0.9rem;
+          color: #666;
+          margin-top: 15px;
+          line-height: 1.4;
+        }
+        
+        .payment-progress {
+          margin-top: 25px;
+          height: 4px;
+          background: #e9ecef;
+          border-radius: 2px;
+          overflow: hidden;
+        }
+        
+        .progress-bar {
+          height: 100%;
+          background: #FFA500;
+          width: 30%;
+          animation: progressBar 2s ease-in-out infinite;
+        }
+        
+        /* Required field indicator */
+        .required {
+          color: #dc3545;
+          margin-left: 4px;
+        }
+        
+        /* Field errors */
+        .field-error {
+          color: #dc3545;
+          font-size: 0.85rem;
+          font-weight: normal;
+          margin-left: 10px;
+        }
+        
+        .form-error {
+          color: #dc3545;
+          font-size: 0.9rem;
+          margin-top: 8px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        
+        /* Category icons */
+        .category-icon {
+          font-size: 1.5rem;
+          margin-bottom: 8px;
+        }
+        
+        /* PAN badges */
+        .pan-badge {
+          color: #28a745;
+          font-weight: 600;
+          font-family: monospace;
+        }
+        
+        .pan-warning {
+          color: #dc3545;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        
+        .summary-item.warning {
+          color: #dc3545;
+        }
+        
+        /* Razorpay badge */
+        .razorpay-badge {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+          justify-content: center;
+        }
+        
+        .razorpay-logo {
+          height: 24px;
+          width: auto;
+          filter: grayscale(1) brightness(0.5);
+        }
+        
+        .razorpay-badge span {
+          font-size: 0.9rem;
+          color: #666;
+          font-weight: 500;
+        }
+        
+        /* Animations */
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(-20px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes progressBar {
+          0% { transform: translateX(-100%); }
+          50% { transform: translateX(100%); }
+          100% { transform: translateX(300%); }
+        }
+        
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.7; }
+          100% { opacity: 1; }
+        }
+        
+        /* Rest of your existing styles... */
+        /* (All the previous styles you had remain the same) */
         
         .donation-page-section {
           position: relative;
-          padding: 40px 0; /* Reduced padding */
+          padding: 40px 0;
           color: #333;
           overflow: hidden;
           background: #ffffff;
@@ -710,7 +1597,7 @@ const DonationPage = ({ onClose }) => {
           position: absolute;
           left: 0;
           right: 0;
-          height: 100px; /* Reduced height */
+          height: 100px;
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
@@ -801,18 +1688,18 @@ const DonationPage = ({ onClose }) => {
           }
         }
         
-        /* Section Header - Reduced margins */
+        /* Section Header */
         .donation-header-section {
           text-align: center;
-          margin-bottom: 30px; /* Reduced from 40px */
+          margin-bottom: 30px;
           position: relative;
           z-index: 2;
         }
         
         .section-title {
           color: #2c3e50;
-          font-size: 2.5rem; /* Slightly reduced */
-          margin-bottom: 10px; /* Reduced from 15px */
+          font-size: 2.5rem;
+          margin-bottom: 10px;
           font-weight: 800;
           text-transform: uppercase;
           letter-spacing: 1px;
@@ -823,7 +1710,7 @@ const DonationPage = ({ onClose }) => {
           width: 100px;
           height: 4px;
           background: #FFA500;
-          margin: 0 auto 15px; /* Reduced bottom margin */
+          margin: 0 auto 15px;
           border-radius: 2px;
           box-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
         }
@@ -833,22 +1720,22 @@ const DonationPage = ({ onClose }) => {
           max-width: 700px;
           margin: 0 auto;
           color: #2c3e50;
-          font-size: 1.1rem; /* Slightly smaller */
+          font-size: 1.1rem;
           line-height: 1.6;
           font-weight: 500;
           background: rgba(255, 255, 255, 0.9);
-          padding: 12px 25px; /* Reduced padding */
-          border-radius: 25px; /* Slightly smaller radius */
+          padding: 12px 25px;
+          border-radius: 25px;
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 165, 0, 0.3);
-          box-shadow: 0 3px 12px rgba(255, 165, 0, 0.2); /* Reduced shadow */
+          box-shadow: 0 3px 12px rgba(255, 165, 0, 0.2);
         }
         
         /* Main Container */
         .donation-container {
           display: grid;
           grid-template-columns: 1fr 1.5fr;
-          gap: 30px; /* Reduced from 40px */
+          gap: 30px;
           position: relative;
           z-index: 2;
         }
@@ -881,51 +1768,51 @@ const DonationPage = ({ onClose }) => {
         }
         
         .impact-header {
-          padding: 25px 25px 15px; /* Reduced padding */
+          padding: 25px 25px 15px;
           border-bottom: 1px solid rgba(255, 165, 0, 0.3);
         }
         
         .impact-icon {
           background: #FFA500;
           color: #2c3e50;
-          width: 55px; /* Slightly smaller */
+          width: 55px;
           height: 55px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.8rem; /* Slightly smaller */
-          margin-bottom: 12px; /* Reduced */
+          font-size: 1.8rem;
+          margin-bottom: 12px;
           box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
         }
         
-        .impact-header h3 {
+        .impact-header h2 {
           color: #2c3e50;
-          font-size: 1.6rem; /* Slightly smaller */
+          font-size: 1.6rem;
           margin: 0;
           font-weight: 700;
         }
         
         .impact-content {
-          padding: 25px; /* Reduced */
+          padding: 25px;
         }
         
         .impact-content p {
           color: #555;
           line-height: 1.8;
           font-size: 1.05rem;
-          margin-bottom: 15px; /* Reduced */
+          margin-bottom: 15px;
         }
         
         .impact-stats {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 12px; /* Reduced */
+          gap: 12px;
           background: rgba(255, 165, 0, 0.15);
-          padding: 18px; /* Reduced */
-          border-radius: 10px; /* Slightly smaller */
+          padding: 18px;
+          border-radius: 10px;
           border: 1px solid rgba(255, 165, 0, 0.3);
-          margin: 20px 0; /* Reduced */
+          margin: 20px 0;
         }
         
         .impact-stat-item {
@@ -936,30 +1823,30 @@ const DonationPage = ({ onClose }) => {
         }
         
         .impact-stat-number {
-          font-size: 1.8rem; /* Reduced */
+          font-size: 1.8rem;
           font-weight: 800;
           color: #2c3e50;
           line-height: 1;
-          margin-bottom: 6px; /* Reduced */
+          margin-bottom: 6px;
           text-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
         }
         
         .impact-stat-label {
-          font-size: 0.85rem; /* Slightly smaller */
+          font-size: 0.85rem;
           color: #666;
           line-height: 1.3;
         }
         
         .security-features {
-          margin-top: 20px; /* Reduced */
+          margin-top: 20px;
         }
         
         .security-item {
           display: flex;
           align-items: center;
           gap: 15px;
-          margin-bottom: 15px; /* Reduced */
-          padding: 12px; /* Reduced */
+          margin-bottom: 15px;
+          padding: 12px;
           background: rgba(255, 255, 255, 0.9);
           border-radius: 10px;
           border: 1px solid rgba(255, 165, 0, 0.2);
@@ -967,27 +1854,27 @@ const DonationPage = ({ onClose }) => {
         
         .security-icon {
           color: #FFA500;
-          font-size: 1.3rem; /* Slightly smaller */
+          font-size: 1.3rem;
           flex-shrink: 0;
         }
         
         .security-item h4 {
           color: #2c3e50;
           margin: 0 0 5px 0;
-          font-size: 1rem; /* Slightly smaller */
+          font-size: 1rem;
         }
         
         .security-item p {
           color: #666;
           margin: 0;
-          font-size: 0.85rem; /* Slightly smaller */
+          font-size: 0.85rem;
         }
         
         /* Right Column - Donation Form */
         .donation-form-column {
           display: flex;
           flex-direction: column;
-          gap: 25px; /* Reduced */
+          gap: 25px;
         }
         
         .donation-form-card {
@@ -996,7 +1883,7 @@ const DonationPage = ({ onClose }) => {
           box-shadow: 0 15px 40px rgba(255, 165, 0, 0.2);
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 165, 0, 0.3);
-          padding: 35px; /* Reduced */
+          padding: 35px;
           position: relative;
         }
         
@@ -1015,8 +1902,8 @@ const DonationPage = ({ onClose }) => {
           align-items: center;
           justify-content: center;
           gap: 10px;
-          margin-bottom: 35px; /* Reduced */
-          padding-bottom: 15px; /* Reduced */
+          margin-bottom: 35px;
+          padding-bottom: 15px;
           border-bottom: 1px solid rgba(255, 165, 0, 0.3);
         }
         
@@ -1082,6 +1969,9 @@ const DonationPage = ({ onClose }) => {
           margin: 0 0 15px 0;
           font-size: 1.2rem;
           font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
         
         .form-note {
@@ -1136,12 +2026,17 @@ const DonationPage = ({ onClose }) => {
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
         }
         
         .type-btn.active {
           background: #4CAF50;
           color: white;
           border-color: #4CAF50;
+          box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
         }
         
         /* Amount Options */
@@ -1153,7 +2048,7 @@ const DonationPage = ({ onClose }) => {
         
         @media (min-width: 768px) {
           .amount-options-grid {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
           }
         }
         
@@ -1234,6 +2129,10 @@ const DonationPage = ({ onClose }) => {
           margin-right: 12px;
         }
         
+        .category-content {
+          flex: 1;
+        }
+        
         .category-content h4 {
           color: #2c3e50;
           margin: 0 0 5px 0;
@@ -1253,18 +2152,22 @@ const DonationPage = ({ onClose }) => {
         }
         
         .form-group label {
-          display: block;
+          display: flex;
+          align-items: center;
           margin-bottom: 8px;
           color: #2c3e50;
           font-weight: 600;
           font-size: 0.95rem;
+          gap: 8px;
         }
         
         .form-hint {
+          display: block;
+          margin-top: 5px;
           font-weight: normal;
           color: #666;
           font-size: 0.85rem;
-          margin-left: 5px;
+          line-height: 1.4;
         }
         
         .form-group input,
@@ -1288,6 +2191,7 @@ const DonationPage = ({ onClose }) => {
         .form-group input:read-only {
           background: #f5f5f5;
           cursor: not-allowed;
+          color: #666;
         }
         
         .form-row {
@@ -1301,11 +2205,17 @@ const DonationPage = ({ onClose }) => {
         }
         
         .form-warning {
-          display: block;
-          margin-top: 5px;
+          display: flex;
+          align-items: flex-start;
+          margin-top: 8px;
           color: #d32f2f;
           font-size: 0.85rem;
           line-height: 1.4;
+          gap: 6px;
+          background: #ffebee;
+          padding: 8px 12px;
+          border-radius: 4px;
+          border-left: 3px solid #d32f2f;
         }
         
         /* Terms Section */
@@ -1370,6 +2280,10 @@ const DonationPage = ({ onClose }) => {
           color: #1565c0;
           margin: 0 0 15px 0;
           text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
         }
         
         .payment-methods {
@@ -1407,15 +2321,19 @@ const DonationPage = ({ onClose }) => {
           cursor: pointer;
           transition: all 0.3s;
           text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          min-height: 50px;
         }
         
         .btn-primary {
-          background: #FFA500;
+          background: linear-gradient(135deg, #FFA500 0%, #ff8c00 100%);
           color: white;
         }
         
         .btn-primary:hover:not(:disabled) {
-          background: #ff8c00;
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
         }
@@ -1423,6 +2341,8 @@ const DonationPage = ({ onClose }) => {
         .btn-primary:disabled {
           background: #ccc;
           cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
         }
         
         .btn-secondary {
@@ -1430,7 +2350,7 @@ const DonationPage = ({ onClose }) => {
           color: white;
         }
         
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
           background: #5a6268;
           transform: translateY(-2px);
         }
@@ -1492,6 +2412,7 @@ const DonationPage = ({ onClose }) => {
         .donation-amount {
           color: #FFA500 !important;
           font-size: 1.2rem;
+          font-weight: 700;
         }
         
         .tax-benefit-badge {
@@ -1529,6 +2450,7 @@ const DonationPage = ({ onClose }) => {
           justify-content: center;
           z-index: 2000;
           padding: 20px;
+          backdrop-filter: blur(4px);
         }
         
         .terms-modal-content {
@@ -1540,6 +2462,8 @@ const DonationPage = ({ onClose }) => {
           overflow: hidden;
           display: flex;
           flex-direction: column;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          animation: fadeIn 0.3s ease;
         }
         
         .terms-modal-close {
@@ -1552,6 +2476,17 @@ const DonationPage = ({ onClose }) => {
           color: #666;
           cursor: pointer;
           z-index: 1;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.3s;
+        }
+        
+        .terms-modal-close:hover {
+          background: #f5f5f5;
         }
         
         .terms-modal-content h3 {
@@ -1620,7 +2555,7 @@ const DonationPage = ({ onClose }) => {
         @media (max-width: 1200px) {
           .donation-container {
             grid-template-columns: 1fr;
-            gap: 25px; /* Reduced */
+            gap: 25px;
           }
           
           .donation-info-column {
@@ -1628,30 +2563,30 @@ const DonationPage = ({ onClose }) => {
           }
           
           .section-title {
-            font-size: 2.2rem; /* Adjusted */
+            font-size: 2.2rem;
           }
         }
         
         @media (max-width: 992px) {
           .donation-main {
-            margin-top: 20px; /* Further reduced for mobile */
+            margin-top: 20px;
           }
           
           .donation-page-section {
-            padding: 30px 0; /* Further reduced */
+            padding: 30px 0;
           }
           
           .section-title {
-            font-size: 1.9rem; /* Adjusted */
+            font-size: 1.9rem;
           }
           
           .donation-subtitle {
-            font-size: 1rem; /* Adjusted */
-            padding: 10px 20px; /* Reduced */
+            font-size: 1rem;
+            padding: 10px 20px;
           }
           
           .donation-form-card {
-            padding: 25px; /* Reduced */
+            padding: 25px;
           }
           
           .category-options-grid {
@@ -1670,17 +2605,17 @@ const DonationPage = ({ onClose }) => {
         
         @media (max-width: 768px) {
           .donation-main {
-            margin-top: 10px; /* Minimal margin for mobile */
+            margin-top: 10px;
           }
           
           .section-title {
-            font-size: 1.7rem; /* Adjusted */
+            font-size: 1.7rem;
           }
           
           .donation-form-card,
           .impact-card,
           .donation-summary-card {
-            padding: 20px; /* Reduced */
+            padding: 20px;
           }
           
           .amount-options-grid {
@@ -1694,7 +2629,7 @@ const DonationPage = ({ onClose }) => {
           
           .impact-stats {
             grid-template-columns: 1fr;
-            gap: 10px; /* Reduced */
+            gap: 10px;
           }
           
           .form-navigation {
@@ -1706,7 +2641,7 @@ const DonationPage = ({ onClose }) => {
           }
           
           .brush-decoration {
-            height: 60px; /* Reduced */
+            height: 60px;
           }
           
           .terms-modal-actions {
@@ -1716,29 +2651,29 @@ const DonationPage = ({ onClose }) => {
         
         @media (max-width: 480px) {
           .section-title {
-            font-size: 1.4rem; /* Adjusted */
+            font-size: 1.4rem;
           }
           
           .donation-form-card,
           .impact-card,
           .donation-summary-card {
-            padding: 15px; /* Reduced */
+            padding: 15px;
           }
           
           .impact-header {
-            padding: 15px 15px 10px; /* Reduced */
+            padding: 15px 15px 10px;
           }
           
-          .impact-header h3 {
-            font-size: 1.3rem; /* Adjusted */
+          .impact-header h2 {
+            font-size: 1.3rem;
           }
           
           .brush-decoration {
-            height: 40px; /* Reduced */
+            height: 40px;
           }
           
           .donation-main {
-            margin-top: 5px; /* Minimal margin */
+            margin-top: 5px;
           }
         }
       `}</style>

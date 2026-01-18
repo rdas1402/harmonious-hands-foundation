@@ -1,0 +1,438 @@
+/* global.css - Standardized Typography for All Pages */
+
+/* Import a clean, modern font system */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base font settings */
+html {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #333;
+  background: #ffffff;
+}
+
+/* ===== HEADER STYLES ===== */
+
+/* Main page titles (Hero sections, section titles) */
+h1, .h1 {
+  font-size: 2.2rem; /* Reduced from 2.8-3.2rem */
+  font-weight: 500; /* Reduced from 800 */
+  line-height: 1.3;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  letter-spacing: -0.3px;
+}
+
+h1 em, .h1 em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Section titles */
+h2, .h2, .section-title {
+  font-size: 1.9rem; /* Reduced from 2.8rem */
+  font-weight: 500; /* Reduced from 800/300 */
+  line-height: 1.3;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Sub-section titles */
+h3, .h3 {
+  font-size: 1.4rem; /* Reduced from 1.8rem */
+  font-weight: 500; /* Reduced from 700 */
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  color: #2c3e50;
+}
+
+/* Card/Box titles */
+h4, .h4 {
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+/* Small titles */
+h5, .h5 {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+/* Tiny titles */
+h6, .h6 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+/* ===== BODY TEXT ===== */
+
+/* Paragraph text */
+p {
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+/* Small text */
+small, .small {
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #666;
+}
+
+/* Fine print */
+.fine-print {
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #777;
+}
+
+/* ===== LINKS ===== */
+a {
+  color: #FFA500;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #FF8C00;
+  text-decoration: underline;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.btn-primary {
+  font-weight: 500;
+}
+
+.btn-secondary {
+  font-weight: 500;
+}
+
+/* ===== FORM ELEMENTS ===== */
+input, textarea, select {
+  font-size: 0.95rem;
+  font-weight: 400;
+  font-family: inherit;
+}
+
+label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* ===== LIST ITEMS ===== */
+li {
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* ===== QUOTES ===== */
+blockquote {
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.6;
+  font-style: italic;
+  color: #666;
+  border-left: 3px solid #FFA500;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+}
+
+/* ===== CODE ===== */
+code {
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 0.85rem;
+  font-weight: 400;
+  background: #f5f5f5;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+}
+
+/* ===== SPECIAL CASES ===== */
+
+/* Volunteer page already has correct size, ensure it doesn't get smaller */
+#volunteer h1,
+#volunteer .section-title,
+#volunteer h2,
+#volunteer h3,
+#volunteer h4 {
+  font-weight: 500;
+}
+
+#volunteer p,
+#volunteer li,
+#volunteer span {
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+/* Hero section adjustments */
+.hero h1 {
+  font-size: 2.4rem; /* Slightly larger for hero, but reduced from 3.2rem */
+  font-weight: 500;
+}
+
+.hero h2 {
+  font-size: 1.8rem;
+  font-weight: 400;
+}
+
+.hero .subtitle {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* About section adjustments */
+.about .section-title {
+  font-size: 1.9rem;
+  font-weight: 300;
+}
+
+.about .highlight {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* Team section adjustments */
+.team .section-title {
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+.team .team-subtitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Stories section adjustments */
+.stories .section-title {
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+.stories .stories-subtitle {
+  font-size: 1.05rem;
+  font-weight: 400;
+}
+
+/* Impact section adjustments */
+.impact .section-title {
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+/* WhatWeDo section adjustments */
+.what-we-do .section-title {
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+/* Approach section adjustments */
+.approach .section-title {
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+/* Donation page adjustments */
+.donation-page .section-title {
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+.donation-page .donation-subtitle {
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+/* Terms page adjustments */
+.terms-page-section .section-title {
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+.terms-page-section .terms-subtitle {
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+@media (max-width: 992px) {
+  html {
+    font-size: 15px;
+  }
+  
+  h1, .h1 {
+    font-size: 2rem;
+  }
+  
+  h2, .h2, .section-title {
+    font-size: 1.7rem;
+  }
+  
+  h3, .h3 {
+    font-size: 1.3rem;
+  }
+  
+  .hero h1 {
+    font-size: 2.2rem;
+  }
+  
+  .hero h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  body {
+    font-size: 14px;
+  }
+  
+  h1, .h1 {
+    font-size: 1.8rem;
+  }
+  
+  h2, .h2, .section-title {
+    font-size: 1.6rem;
+  }
+  
+  h3, .h3 {
+    font-size: 1.25rem;
+  }
+  
+  p {
+    font-size: 0.9rem;
+  }
+  
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .hero h2 {
+    font-size: 1.4rem;
+  }
+  
+  .hero .subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .btn {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1, .h1 {
+    font-size: 1.6rem;
+  }
+  
+  h2, .h2, .section-title {
+    font-size: 1.4rem;
+  }
+  
+  h3, .h3 {
+    font-size: 1.2rem;
+  }
+  
+  .hero h1 {
+    font-size: 1.7rem;
+  }
+  
+  .hero .subtitle {
+    font-size: 1rem;
+  }
+  
+  .team-subtitle,
+  .donation-subtitle,
+  .terms-subtitle,
+  .stories-subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+.font-light {
+  font-weight: 300;
+}
+
+.font-regular {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.85rem; }
+.text-base { font-size: 0.95rem; }
+.text-lg { font-size: 1.1rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.75rem; }
+.text-4xl { font-size: 2rem; }
+
+/* ===== CONSISTENT LINE HEIGHTS ===== */
+.leading-tight { line-height: 1.25; }
+.leading-normal { line-height: 1.5; }
+.leading-relaxed { line-height: 1.6; }
+.leading-loose { line-height: 2; }
+
+/* ===== LETTER SPACING ===== */
+.tracking-tight { letter-spacing: -0.05em; }
+.tracking-normal { letter-spacing: 0; }
+.tracking-wide { letter-spacing: 0.05em; }
+.tracking-wider { letter-spacing: 0.1em; }
