@@ -1,7 +1,53 @@
 // components/VolunteerSignupPopup.js - SEPARATE FILE
 import React, { useState } from 'react';
 import { FaTimes, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaBriefcase, FaCheck, FaCalendar, FaTransgender, FaStar, FaHeart, FaArrowRight } from 'react-icons/fa';
+import axios from 'axios'; // Import axios for consistency with other services
 import '../styles/components/VolunteerSignupPopup.css';
+
+// Create axios instance with environment-based configuration
+const apiClient = axios.create({
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api',
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+// Add request interceptor for logging
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log(`[${process.env.REACT_APP_ENV}] Volunteer API Request:`, {
+      method: config.method,
+      url: config.url,
+      baseURL: config.baseURL
+    });
+    return config;
+  },
+  (error) => {
+    console.error('Volunteer Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log(`[${process.env.REACT_APP_ENV}] Volunteer API Response:`, {
+      status: response.status,
+      url: response.config.url
+    });
+    return response;
+  },
+  (error) => {
+    console.error(`[${process.env.REACT_APP_ENV}] Volunteer API Error:`, {
+      message: error.message,
+      url: error.config?.url,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    return Promise.reject(error);
+  }
+);
 
 const VolunteerSignupPopup = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -49,6 +95,10 @@ const VolunteerSignupPopup = ({ onClose, onSuccess }) => {
         setError('Please enter a valid 10-digit phone number');
         return;
       }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        setError('Please enter a valid email address');
+        return;
+      }
     }
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
@@ -75,35 +125,48 @@ const VolunteerSignupPopup = ({ onClose, onSuccess }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8080/api/volunteers/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+      // Use the axios instance with environment-based baseURL
+      const response = await apiClient.post('/volunteers/register', formData);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.data.success) {
         setSuccess(true);
-        if (onSuccess) onSuccess(data);
+        if (onSuccess) onSuccess(response.data);
         
         // Auto close after 3 seconds
         setTimeout(() => {
           onClose();
         }, 3000);
       } else {
-        setError(data.message || 'Registration failed. Please try again.');
+        setError(response.data.message || 'Registration failed. Please try again.');
       }
     } catch (err) {
-      setError('Network error. Please try again later.');
-      console.error('Error:', err);
+      console.error('Volunteer registration error:', err);
+      
+      // Provide user-friendly error messages based on environment
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        errorMessage = err.response.data?.message || `Server error: ${err.response.status}`;
+      } else if (err.request) {
+        // The request was made but no response was received
+        if (process.env.REACT_APP_ENV === 'production') {
+          errorMessage = 'Unable to connect to server. Please check your internet connection.';
+        } else {
+          errorMessage = `Network error. Please ensure the backend server is running at ${process.env.REACT_APP_API_BASE_URL}`;
+        }
+      } else {
+        // Something happened in setting up the request
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
+  // Rest of the component remains the same...
   const renderStep = () => {
     switch(currentStep) {
       case 1:
@@ -376,6 +439,9 @@ const VolunteerSignupPopup = ({ onClose, onSuccess }) => {
     }
   };
 
+  // Show environment info in development/staging
+  const showEnvironmentInfo = process.env.REACT_APP_ENV !== 'production';
+
   if (success) {
     return (
       <div className="volunteer-popup-overlay">
@@ -444,6 +510,16 @@ const VolunteerSignupPopup = ({ onClose, onSuccess }) => {
             <h2>Become a Volunteer</h2>
             <p>Join our community of everyday heroes</p>
             
+            {/* Environment info banner for non-production */}
+            {showEnvironmentInfo && (
+              <div className="environment-info">
+                <small>
+                  Environment: {process.env.REACT_APP_ENV.toUpperCase()} | 
+                  API: {process.env.REACT_APP_API_BASE_URL}
+                </small>
+              </div>
+            )}
+            
             <div className="progress-bar">
               <div 
                 className="progress-fill" 
@@ -467,6 +543,11 @@ const VolunteerSignupPopup = ({ onClose, onSuccess }) => {
           {error && (
             <div className="error-message">
               <p>{error}</p>
+              {showEnvironmentInfo && (
+                <small className="error-details">
+                  API Endpoint: {process.env.REACT_APP_API_BASE_URL}/volunteers/register
+                </small>
+              )}
             </div>
           )}
           

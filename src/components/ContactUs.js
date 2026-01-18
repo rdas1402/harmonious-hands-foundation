@@ -55,6 +55,10 @@ const ContactUs = ({ onClose }) => {
     workingHours: 'Monday to Friday: 9:00 AM - 6:00 PM'
   });
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Fetch locations from API on component mount
   useEffect(() => {
     const fetchLocations = async () => {
@@ -88,7 +92,7 @@ const ContactUs = ({ onClose }) => {
         // Check if we have other locations array
         if (locationsData.otherLocations && Array.isArray(locationsData.otherLocations)) {
           locationsData.otherLocations.forEach((city, index) => {
-            if (city && city.toLowerCase() !== 'mumbai') {
+            if (city && city.toLowerCase() !== 'jorhat') {
               const locationData = {
                 id: `location-${index}`,
                 city: city,
@@ -153,7 +157,6 @@ const ContactUs = ({ onClose }) => {
     };
     
     fetchLocations();
-    window.scrollTo(0, 0);
   }, []);
 
   // Clear success state when component unmounts
