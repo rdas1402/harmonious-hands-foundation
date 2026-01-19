@@ -144,8 +144,8 @@ const Footer = ({ onDonateClick, onVolunteerClick, onNavClick, isDonationPage = 
             </div>
             {/* Development credit added here */}
             <div className="development-credit">
-              <span className="credit-text">Developed by </span>
-              <span className="company-name">RupiQ Technologies</span>
+              {/* <span className="credit-text">Developed by </span> */}
+              <span className="company-name">Developed by RupiQ Technologies</span>
             </div>
           </div>
         </div>
