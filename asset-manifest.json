@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.2e09b31f.css",
-    "main.js": "/static/js/main.fcf68190.js",
+    "main.css": "/static/css/main.0898fe7c.css",
+    "main.js": "/static/js/main.ef361604.js",
     "static/media/brochure.png": "/static/media/brochure.1814d259eec6e852c880.png",
     "static/media/cm_event_5.webp": "/static/media/cm_event_5.0a2c395837d11b8facb4.webp",
     "static/media/event_2_1.webp": "/static/media/event_2_1.d1b89aa499a8aed230ba.webp",
@@ -11,7 +11,9 @@
     "static/media/cm_event_4.webp": "/static/media/cm_event_4.f56041ff1cc55390a267.webp",
     "static/media/cm_event_8.webp": "/static/media/cm_event_8.bab6f3e24352404c9af9.webp",
     "static/media/volunteer_child.jpeg": "/static/media/volunteer_child.f7906c35bcc627d7453c.jpeg",
+    "static/media/Gajen_Bhuyan.png": "/static/media/Gajen_Bhuyan.d1a75c96d1aa7818e407.png",
     "static/media/with_cm_hemanta_sir_1.webp": "/static/media/with_cm_hemanta_sir_1.246719e9a959681281a6.webp",
+    "static/media/Satyajit_Baruah.png": "/static/media/Satyajit_Baruah.21c0483bd2b4ef2ff700.png",
     "static/media/with_cm_hemanta_sir_2.webp": "/static/media/with_cm_hemanta_sir_2.942a0bbf287472038f96.webp",
     "static/media/cm_event_1.webp": "/static/media/cm_event_1.bd639d76fe65334dee66.webp",
     "static/media/abstract-img.jpeg": "/static/media/abstract-img.289a4ca01beea9d142da.jpeg",
@@ -22,10 +24,13 @@
     "static/media/2026-01-04_3.jpeg": "/static/media/2026-01-04_3.db55097413004e8e8c9d.jpeg",
     "static/media/cm_event_10.webp": "/static/media/cm_event_10.410ab889a0cdf44980e4.webp",
     "static/media/cm_event_6.webp": "/static/media/cm_event_6.745c18ee0a319ed974e3.webp",
+    "static/media/Anil_Kalita.png": "/static/media/Anil_Kalita.9c12b9251d02bd6c95b2.png",
     "static/media/2026-01-04_1.jpeg": "/static/media/2026-01-04_1.abffc4e6c65d8771bcb5.jpeg",
     "static/media/2026-01-04_6.jpeg": "/static/media/2026-01-04_6.cc8981837207a624764d.jpeg",
     "static/media/2026-01-04_7.jpeg": "/static/media/2026-01-04_7.b50aa968cc6a3d0138d5.jpeg",
+    "static/media/Nabo_Talukder.png": "/static/media/Nabo_Talukder.69895176ae32f498c9ae.png",
     "static/media/cm_event_7.webp": "/static/media/cm_event_7.fbb4640f737b62739cb0.webp",
+    "static/media/Anshu_Bikash_Hazarika.avif": "/static/media/Anshu_Bikash_Hazarika.806fde59f7a74f60269f.avif",
     "static/media/2026-01-04_5.jpeg": "/static/media/2026-01-04_5.a81899df5172cc5afd94.jpeg",
     "static/media/2026-01-04_4.jpeg": "/static/media/2026-01-04_4.db55097413004e8e8c9d.jpeg",
     "static/media/with_cm_hemanta_sir_3.avif": "/static/media/with_cm_hemanta_sir_3.9d45b03dead35f5ee32d.avif",
@@ -63,7 +68,7 @@
     "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.2e09b31f.css",
-    "static/js/main.fcf68190.js"
+    "static/css/main.0898fe7c.css",
+    "static/js/main.ef361604.js"
   ]
 }
