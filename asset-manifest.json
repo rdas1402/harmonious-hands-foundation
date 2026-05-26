@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.0898fe7c.css",
-    "main.js": "/static/js/main.ef361604.js",
+    "main.js": "/static/js/main.f2c816da.js",
     "static/media/brochure.png": "/static/media/brochure.1814d259eec6e852c880.png",
     "static/media/cm_event_5.webp": "/static/media/cm_event_5.0a2c395837d11b8facb4.webp",
     "static/media/event_2_1.webp": "/static/media/event_2_1.d1b89aa499a8aed230ba.webp",
@@ -16,6 +16,7 @@
     "static/media/Satyajit_Baruah.png": "/static/media/Satyajit_Baruah.21c0483bd2b4ef2ff700.png",
     "static/media/with_cm_hemanta_sir_2.webp": "/static/media/with_cm_hemanta_sir_2.942a0bbf287472038f96.webp",
     "static/media/cm_event_1.webp": "/static/media/cm_event_1.bd639d76fe65334dee66.webp",
+    "static/media/Prabhat_Borah_Buhabhakat.png": "/static/media/Prabhat_Borah_Buhabhakat.544c0403c38a9f0face4.png",
     "static/media/abstract-img.jpeg": "/static/media/abstract-img.289a4ca01beea9d142da.jpeg",
     "static/media/cm_event.webp": "/static/media/cm_event.04e60b59f3b772f1b38f.webp",
     "static/media/cm_event_3.webp": "/static/media/cm_event_3.b450d514df269ab2312c.webp",
@@ -69,6 +70,6 @@
   },
   "entrypoints": [
     "static/css/main.0898fe7c.css",
-    "static/js/main.ef361604.js"
+    "static/js/main.f2c816da.js"
   ]
 }
