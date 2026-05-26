@@ -83,7 +83,7 @@ const Team = () => {
       id: 7,
       name: "Paban Borah",
       role: "Joint Secretary",
-      image: require('../assets/team/Abhi_Ruhan_Handique.avif'),
+      image: require('../assets/team/paban_borah.jpeg'),
       description: "Assists in secretarial duties and ensures smooth communication within the team."
     },
     {
