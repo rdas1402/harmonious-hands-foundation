@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.cf625be0.css",
-    "main.js": "/static/js/main.ee210942.js",
+    "main.js": "/static/js/main.84e733f5.js",
     "static/media/brochure.png": "/static/media/brochure.1814d259eec6e852c880.png",
     "static/media/cm_event_5.webp": "/static/media/cm_event_5.0a2c395837d11b8facb4.webp",
     "static/media/event_2_1.webp": "/static/media/event_2_1.d1b89aa499a8aed230ba.webp",
@@ -30,6 +30,7 @@
     "static/media/2026-01-04_6.jpeg": "/static/media/2026-01-04_6.cc8981837207a624764d.jpeg",
     "static/media/2026-01-04_7.jpeg": "/static/media/2026-01-04_7.b50aa968cc6a3d0138d5.jpeg",
     "static/media/Nabo_Talukder.png": "/static/media/Nabo_Talukder.69895176ae32f498c9ae.png",
+    "static/media/paban_borah.jpeg": "/static/media/paban_borah.1e52e3abbcbc4bb2d2e4.jpeg",
     "static/media/cm_event_7.webp": "/static/media/cm_event_7.fbb4640f737b62739cb0.webp",
     "static/media/Anshu_Bikash_Hazarika.avif": "/static/media/Anshu_Bikash_Hazarika.806fde59f7a74f60269f.avif",
     "static/media/2026-01-04_5.jpeg": "/static/media/2026-01-04_5.a81899df5172cc5afd94.jpeg",
@@ -60,6 +61,6 @@
   },
   "entrypoints": [
     "static/css/main.cf625be0.css",
-    "static/js/main.ee210942.js"
+    "static/js/main.84e733f5.js"
   ]
 }
