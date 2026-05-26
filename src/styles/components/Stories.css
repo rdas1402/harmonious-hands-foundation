@@ -745,27 +745,27 @@
     width: 280px;
     height: 350px;
   }
-  
+
   .position-0.center {
     width: 400px;
     height: 500px;
   }
-  
+
   .gallery-carousel-container {
     height: 420px;
     min-height: 420px;
   }
-  
+
   .gallery-carousel {
     height: 420px;
   }
-  
+
   .carousel-arrow {
     width: 65px;
     height: 65px;
     font-size: 1.8rem;
   }
-  
+
   .gallery-spacing {
     height: 70px;
   }
@@ -775,38 +775,38 @@
   .gallery-title {
     font-size: 2.2rem;
   }
-  
+
   .gallery-carousel {
     max-width: 900px;
   }
-  
+
   .position--1, .position-1 {
     width: 250px;
     height: 320px;
     left: 10%;
     right: 10%;
   }
-  
+
   .position-0.center {
     width: 350px;
     height: 440px;
   }
-  
+
   .gallery-carousel-container {
     height: 380px;
     min-height: 380px;
   }
-  
+
   .gallery-carousel {
     height: 380px;
   }
-  
+
   .carousel-arrow {
     width: 60px;
     height: 60px;
     font-size: 1.7rem;
   }
-  
+
   .gallery-spacing {
     height: 60px;
   }
@@ -814,58 +814,58 @@
 
 @media (max-width: 992px) {
   .stories {
-    scroll-margin-top: 70px;
+    scroll-margin-top: 100px;
     padding: 60px 0;
   }
-  
+
   .section-title {
     font-size: 2.3rem;
   }
-  
+
   .gallery-title {
     font-size: 2rem;
   }
-  
+
   .gallery-carousel-container {
     gap: 20px;
     height: 350px;
     min-height: 350px;
   }
-  
+
   .carousel-arrow {
     width: 55px;
     height: 55px;
     font-size: 1.5rem;
   }
-  
+
   .position--1, .position-1 {
     width: 220px;
     height: 280px;
   }
-  
+
   .position-0.center {
     width: 300px;
     height: 380px;
   }
-  
+
   .gallery-carousel {
     height: 350px;
   }
-  
+
   .gallery-header-divider {
     max-width: 120px;
   }
-  
+
   .gallery-spacing {
     height: 50px;
   }
-  
+
   /* Modal Responsive */
   .event-modal-content {
     width: 95%;
     max-height: 85vh;
   }
-  
+
   .modal-gallery-carousel-container {
     height: 350px;
     min-height: 350px;
@@ -874,86 +874,139 @@
 
 @media (max-width: 768px) {
   .stories {
-    scroll-margin-top: 70px;
+    scroll-margin-top: 100px;
   }
-  
+
   .gallery-preview {
-    padding: 40px 30px 30px;
+    padding: 40px 20px 30px;
   }
-  
+
   .gallery-title {
     font-size: 1.8rem;
   }
-  
+
   .section-title {
     font-size: 2rem;
   }
-  
+
   .gallery-carousel-container {
-    gap: 15px;
+    display: block;
+    gap: 0;
     height: 320px;
     min-height: 320px;
+    overflow: visible;
   }
-  
+
   .carousel-arrow {
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     font-size: 1.3rem;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
   }
-  
+
+  .gallery-carousel-container > .carousel-arrow:hover:not(:disabled) {
+    transform: translateY(-50%) scale(1.06);
+  }
+
+  .gallery-carousel-container > .carousel-arrow:disabled {
+    transform: translateY(-50%) !important;
+  }
+
+  .gallery-carousel-container > .left-arrow {
+    left: 0;
+  }
+
+  .gallery-carousel-container > .right-arrow {
+    right: 0;
+  }
+
   .position--1, .position-1 {
     width: 180px;
     height: 230px;
     display: none;
   }
-  
+
   .position-0.center {
-    width: 280px;
+    width: min(280px, calc(100% - 96px));
     height: 350px;
     left: 50%;
     transform: translateX(-50%) scale(1);
   }
-  
+
   .gallery-carousel {
     height: 320px;
+    max-width: 100%;
+    padding: 0 48px;
+    box-sizing: border-box;
   }
-  
+
   .gallery-header-divider {
     max-width: 80px;
   }
-  
+
   .gallery-spacing {
     height: 40px;
   }
-  
+
   /* Modal Responsive */
   .modal-header {
     padding: 20px 25px 15px;
   }
-  
+
   .modal-title {
     font-size: 1.5rem;
   }
-  
+
   .modal-body {
     padding: 20px;
   }
-  
+
   .event-info {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .modal-gallery-carousel-container {
+    display: block;
     height: 300px;
     min-height: 300px;
-    gap: 20px;
+    gap: 0;
+    overflow: visible;
   }
-  
+
   .modal-carousel-arrow {
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     font-size: 1.5rem;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    z-index: 20;
+  }
+
+  .modal-gallery-carousel-container > .modal-carousel-arrow:hover:not(:disabled) {
+    transform: translateY(-50%) scale(1.06);
+  }
+
+  .modal-gallery-carousel-container > .modal-carousel-arrow:disabled {
+    transform: translateY(-50%) !important;
+  }
+
+  .modal-gallery-carousel-container > .left-arrow {
+    left: 0;
+  }
+
+  .modal-gallery-carousel-container > .right-arrow {
+    right: 0;
+  }
+
+  .modal-main-photo {
+    height: 100%;
+    margin: 0 48px;
   }
 }
 
@@ -962,53 +1015,53 @@
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .gallery-header-divider {
     width: 100px;
     max-width: 100px;
   }
-  
+
   .gallery-title {
     font-size: 1.7rem;
   }
-  
+
   .gallery-carousel-container {
     flex-direction: row;
     height: 300px;
     min-height: 300px;
   }
-  
+
   .gallery-carousel {
     flex-direction: row;
     height: 300px;
   }
-  
+
   .position-0.center {
-    width: 250px;
+    width: min(250px, calc(100% - 88px));
     height: 320px;
   }
-  
+
   .gallery-spacing {
     height: 30px;
   }
-  
+
   .gallery-info {
     flex-direction: column;
     gap: 3px;
   }
-  
+
   /* Modal Responsive */
   .event-modal-content {
     padding: 0;
     max-height: 80vh;
   }
-  
+
   .modal-gallery-carousel-container {
     height: 250px;
     min-height: 250px;
-    gap: 15px;
+    gap: 0;
   }
-  
+
   .modal-carousel-arrow {
     width: 45px;
     height: 45px;
@@ -1020,59 +1073,63 @@
   .section-title {
     font-size: 1.8rem;
   }
-  
+
   .gallery-title {
     font-size: 1.5rem;
   }
-  
+
   .stories-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .position-0.center {
-    width: 220px;
+    width: min(220px, calc(100% - 84px));
     height: 280px;
   }
-  
+
   .carousel-arrow {
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
     font-size: 1.2rem;
   }
-  
+
   .gallery-carousel-container {
     height: 280px;
     min-height: 280px;
   }
-  
+
   .gallery-carousel {
     height: 280px;
   }
-  
+
   .gallery-spacing {
     height: 20px;
   }
-  
+
   /* Modal Responsive */
   .modal-title {
     font-size: 1.3rem;
   }
-  
+
   .modal-close {
     width: 35px;
     height: 35px;
   }
-  
+
   .modal-gallery-carousel-container {
     height: 220px;
     min-height: 220px;
   }
-  
+
+  .modal-main-photo {
+    margin: 0 44px;
+  }
+
   .event-info {
     gap: 10px;
   }
-  
+
   .info-item {
     padding: 8px 12px;
     font-size: 0.9rem;

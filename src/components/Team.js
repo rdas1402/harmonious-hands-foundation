@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft, FaChevronRight, FaQuoteLeft, FaUsers, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { FaQuoteLeft, FaUsers, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import '../styles/components/Team.css';
 
 const Team = () => {
@@ -35,126 +35,116 @@ const Team = () => {
     }
   ];
 
-  // Managing Committee (Previously Directors)
+  // Managing Committee (Previously Directors) – All descriptions added
   const committeeMembers = [
     {
       id: 1,
       name: "Aditya Goswami",
-      role: "President",
+      role: "Advisor",
       image: require('../assets/team/Aditya_Goswami.avif'),
-      description: "Develops holistic education programs"
+      description: "Provides strategic guidance and helps shape the foundation's long-term vision."
     },
     {
       id: 2,
-      name: "Pratap Ch. Baruah",
-      role: "Vice President",
-      image: require('../assets/team/Pratap_Baruah.avif'),
-      description: "Manages healthcare access initiatives"
+      name: "Brajen Kataki",
+      role: "President",
+      image: require('../assets/team/Brajen_Kataki.jpeg'),
+      description: "Leads the overall governance and ensures alignment with the foundation's mission."
     },
     {
       id: 3,
-      name: "Mahendra Dutta",
-      role: "Vice President",
-      image: require('../assets/team/Mahendra_Dutta.avif'),
-      description: "Manages healthcare access initiatives"
+      name: "Prabhat Borah Buhabhakat",
+      role: "Working President",
+      image: require('../assets/team/Prabhat_Borah_Buhabhakat.png'),
+      description: "Manifies day-to-day operations and coordinates between different teams."
     },
     {
       id: 4,
-      name: "Abhi Ruhan Handique",
-      role: "General Secretary",
-      image: require('../assets/team/Abhi_Ruhan_Handique.avif'),
-      description: "Manages healthcare access initiatives"
+      name: "Pratap Ch. Baruah",
+      role: "Vice President",
+      image: require('../assets/team/Pratap_Baruah.avif'),
+      description: "Manages healthcare access initiatives and community health programs."
     },
     {
       id: 5,
-      name: "Utpal Borah",
-      role: "Publicity Secretary",
-      image: require('../assets/team/Utpal_Borah.avif'),
-      description: "Manages healthcare access initiatives"
+      name: "Sri Sekhorjyoti Hazarika",
+      role: "Vice President",
+      image: require('../assets/team/shekhar.avif'),
+      description: "Supports committee leadership and oversees program implementation."
     },
     {
       id: 6,
-      name: "Sibchand Hatibaruah",
-      role: "Organising Secretary",
-      image: require('../assets/team/sibchand.avif'),
-      description: ""
+      name: "Kalyan Dutta",
+      role: "General Secretary",
+      image: require('../assets/team/kalyan.avif'),
+      description: "Coordinates all administrative and operational functions of the foundation."
     },
     {
       id: 7,
-      name: "Arindam Hazarika",
-      role: "Organising Secretary",
-      image: require('../assets/team/arindam.avif'),
-      description: ""
+      name: "Paban Borah",
+      role: "Joint Secretary",
+      image: require('../assets/team/Abhi_Ruhan_Handique.avif'),
+      description: "Assists in secretarial duties and ensures smooth communication within the team."
     },
     {
       id: 8,
-      name: "Shekhar Jyoti Hazarika",
-      role: "Project Coordinator",
-      image: require('../assets/team/shekhar.avif'),
-      description: ""
+      name: "Anshu Bikash Hazarika",
+      role: "Joint Secretary",
+      image: require('../assets/team/Anshu_Bikash_Hazarika.avif'),
+      description: "Supports committee coordination and helps execute strategic decisions."
     },
     {
       id: 9,
-      name: "Tulsi Rajkhowa",
-      role: "Assistant Secretary",
-      image: require('../assets/team/tulsi.avif'),
-      description: ""
+      name: "Gajen Bhuyan",
+      role: "Cultural Secretary",
+      image: require('../assets/team/Gajen_Bhuyan.png'),
+      transparentPhoto: true,
+      description: "Coordinates cultural programs and fosters community participation in events."
     },
     {
       id: 10,
-      name: "Kapil Borah",
-      role: "Treasurer",
-      image: require('../assets/team/Kapil.avif'),
-      description: ""
+      name: "Satyajit Baruah",
+      role: "Publicity Secretary",
+      image: require('../assets/team/Satyajit_Baruah.png'),
+      transparentPhoto: true,
+      description: "Leads outreach, media relations, and public communications for the foundation."
     },
     {
       id: 11,
-      name: "Kumud Chandra Das",
-      role: "Spokesman",
-      image: require('../assets/team/kumud.avif'),
-      description: ""
+      name: "Abhi Ruhan Handique",
+      role: "Organising Secretary",
+      image: require('../assets/team/Abhi_Ruhan_Handique.avif'),
+      description: "Plans and organizes foundation events, workshops, and volunteer activities."
     },
     {
       id: 12,
-      name: "Tonkham Buragohain",
-      role: "Digital & Web Coordinator",
-      image: require('../assets/team/tonkham.avif'),
-      description: ""
+      name: "Nabo Talukder",
+      role: "Treasurer",
+      image: require('../assets/team/Nabo_Talukder.png'),
+      transparentPhoto: true,
+      description: "Oversees financial management, budgeting, and ensures transparent fund usage."
     },
     {
       id: 13,
-      name: "Depanjali Bharali Bora",
-      role: "Ex Member",
-      image: require('../assets/team/deepanjali.avif'),
-      description: ""
+      name: "Anil Kalita",
+      role: "Executive Member",
+      image: require('../assets/team/Anil_Kalita.png'),
+      transparentPhoto: true,
+      description: "Supports program planning and helps execute field-level initiatives."
     },
     {
       id: 14,
       name: "Chinmoy Gogoi",
-      role: "Ex Member",
+      role: "Executive Member",
       image: require('../assets/team/chinmoy.avif'),
-      description: ""
+      description: "Contributes to project implementation and community engagement efforts."
     },
     {
       id: 15,
-      name: "Dr. Hemanta Borah",
-      role: "Ex Member",
-      image: require('../assets/team/hemanta.avif'),
-      description: ""
-    },
-    {
-      id: 16,
-      name: "Naba Talukdar",
-      role: "Ex Member",
-      image: require('../assets/team/naba.avif'),
-      description: ""
-    },
-    {
-      id: 17,
-      name: "Kalyan Dutta",
-      role: "Ex Member",
-      image: require('../assets/team/kalyan.avif'),
-      description: ""
+      name: "Dipankar Borah",
+      role: "Executive Member",
+      image: require('../assets/team/Dipankar_Borah.jpeg'),
+      description: "Assists in monitoring and evaluation of ongoing foundation projects."
     }
   ];
 
@@ -253,10 +243,9 @@ const Team = () => {
           </button>
         </div>
         
-        {/* Board of Directors Panel (Now First) */}
+        {/* Board of Directors Panel */}
         {activeTab === 'board' && (
           <div className="team-unified-panel">
-            {/* Left Column - Board Description */}
             <div className="committee-column">
               <div className="committee-card">
                 <div className="committee-header">
@@ -290,7 +279,6 @@ const Team = () => {
               </div>
             </div>
             
-            {/* Right Column - Board Members with Navigation */}
             <div className="members-column">
               <div className="team-members-section">
                 <div className="team-members-header">
@@ -301,7 +289,6 @@ const Team = () => {
                 </div>
                 
                 <div className="team-members-navigation">
-                  {/* Left Arrow Button */}
                   <button 
                     className="arrow-btn left-arrow" 
                     onClick={prevBoardSlide}
@@ -310,7 +297,6 @@ const Team = () => {
                     <FaArrowLeft />
                   </button>
                   
-                  {/* Board Members Grid */}
                   <div className="team-members-grid">
                     {visibleBoardMembers.map((member) => (
                       <div key={member.id} className="team-member-card">
@@ -319,7 +305,7 @@ const Team = () => {
                             <img 
                               src={member.image} 
                               alt={member.name}
-                              className="member-photo"
+                              className={`member-photo ${member.transparentPhoto ? 'member-photo--transparent' : ''}`}
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = 'https://via.placeholder.com/400x500?text=Member+Photo';
@@ -332,14 +318,15 @@ const Team = () => {
                         </div>
                         <div className="member-info">
                           <h4>{member.name}</h4>
-                          <p className="member-description">{member.description}</p>
+                          {member.description && (
+                            <p className="member-description">{member.description}</p>
+                          )}
                           <div className="member-divider"></div>
                         </div>
                       </div>
                     ))}
                   </div>
                   
-                  {/* Right Arrow Button */}
                   <button 
                     className="arrow-btn right-arrow" 
                     onClick={nextBoardSlide}
@@ -364,10 +351,9 @@ const Team = () => {
           </div>
         )}
 
-        {/* Managing Committee Panel (Now Second) */}
+        {/* Managing Committee Panel */}
         {activeTab === 'committee' && (
           <div className="team-unified-panel">
-            {/* Left Column - Managing Committee Description */}
             <div className="committee-column">
               <div className="committee-card">
                 <div className="committee-header">
@@ -386,7 +372,7 @@ const Team = () => {
                   <div className="committee-stats">
                     <div className="stat-item">
                       <span className="stat-number">{committeeMembers.length}</span>
-                      <span className="stat-label">Expert Directors</span>
+                      <span className="stat-label">Committee Members</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-number">15+</span>
@@ -401,7 +387,6 @@ const Team = () => {
               </div>
             </div>
             
-            {/* Right Column - Committee Members with Navigation */}
             <div className="members-column">
               <div className="team-members-section">
                 <div className="team-members-header">
@@ -412,7 +397,6 @@ const Team = () => {
                 </div>
                 
                 <div className="team-members-navigation">
-                  {/* Left Arrow Button */}
                   <button 
                     className="arrow-btn left-arrow" 
                     onClick={prevSlide}
@@ -421,7 +405,6 @@ const Team = () => {
                     <FaArrowLeft />
                   </button>
                   
-                  {/* Committee Members Grid */}
                   <div className="team-members-grid">
                     {visibleCommitteeMembers.map((member) => (
                       <div key={member.id} className="team-member-card">
@@ -430,7 +413,7 @@ const Team = () => {
                             <img 
                               src={member.image} 
                               alt={member.name}
-                              className="member-photo"
+                              className={`member-photo ${member.transparentPhoto ? 'member-photo--transparent' : ''}`}
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = 'https://via.placeholder.com/400x500?text=Member+Photo';
@@ -450,7 +433,6 @@ const Team = () => {
                     ))}
                   </div>
                   
-                  {/* Right Arrow Button */}
                   <button 
                     className="arrow-btn right-arrow" 
                     onClick={nextSlide}

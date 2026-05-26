@@ -1748,8 +1748,8 @@ const ContactUs = ({ onClose }) => {
         @media (max-width: 768px) {
           .contact-us-page {
             padding: 40px 0 20px;
-            scroll-margin-top: 70px;
-            top: 50px;
+            scroll-margin-top: 100px;
+            top: 0;
           }
           
           .section-title {

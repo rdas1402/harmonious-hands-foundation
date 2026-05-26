@@ -718,15 +718,15 @@ body.mobile-menu-open {
   .main-nav {
     margin-left: 100px;
   }
-  
+
   .nav-menu {
     gap: 25px;
   }
-  
+
   .top-bar-right {
     padding-left: 95px;
   }
-  
+
   .expandable-menu {
     min-width: 180px;
   }
@@ -736,19 +736,19 @@ body.mobile-menu-open {
   .main-nav {
     margin-left: 80px;
   }
-  
+
   .nav-menu {
     gap: 22px;
   }
-  
+
   .nav-link {
     font-size: 0.9rem;
   }
-  
+
   .top-bar-right {
     padding-left: 90px;
   }
-  
+
   .donate-btn {
     padding: 8px 25px !important;
     font-size: 0.9rem;
@@ -759,41 +759,45 @@ body.mobile-menu-open {
   .main-nav {
     margin-left: 60px;
   }
-  
+
   .nav-menu {
     gap: 20px;
   }
-  
+
   .top-contact-info {
     gap: 15px;
   }
-  
+
   .top-contact-link {
     font-size: 0.7rem;
   }
-  
+
   .top-follow-text {
     font-size: 0.7rem;
   }
-  
+
   .social-icon {
     font-size: 0.8rem;
   }
-  
+
   .nav-link {
     font-size: 0.88rem;
   }
-  
+
   .donate-btn {
     padding: 8px 22px !important;
     font-size: 0.88rem;
   }
-  
+
+  .donate-section {
+    margin-right: 0;
+  }
+
   .top-bar-logo .logo-image {
     width: 80px;
     height: 80px;
   }
-  
+
   .top-bar-right {
     padding-left: 85px;
   }
@@ -803,28 +807,28 @@ body.mobile-menu-open {
   .main-nav {
     margin-left: 50px;
   }
-  
+
   .nav-menu {
     gap: 18px;
   }
-  
+
   .top-contact-info {
     gap: 10px;
   }
-  
+
   .top-contact-link {
     font-size: 0.65rem;
   }
-  
+
   .social-icons-container {
     gap: 10px;
   }
-  
+
   .top-bar-logo .logo-image {
     width: 75px;
     height: 75px;
   }
-  
+
   .top-bar-right {
     padding-left: 80px;
   }
@@ -836,67 +840,86 @@ body.mobile-menu-open {
     display: flex !important;
     height: 40px;
   }
-  
+
   .main-header {
     top: 40px !important;
     height: 60px;
   }
-  
+
   /* HIDE TOP BAR LOGO ON MOBILE */
   .top-bar-logo {
     display: none !important;
   }
-  
+
   .top-bar-content {
     justify-content: space-between;
     padding: 0 10px;
+    min-width: 0;
   }
-  
+
   .top-bar-right {
     padding-left: 0;
     justify-content: flex-end;
     width: auto;
     gap: 10px;
+    min-width: 0;
   }
-  
+
   .top-contact-info {
     flex-direction: row;
     gap: 10px;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
+    min-width: 0;
   }
-  
+
+  .top-contact-item {
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .top-social-media {
     display: none;
   }
-  
+
   .top-contact-link {
     font-size: 0.6rem !important;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  
+
+  .top-contact-item:first-child .top-contact-link {
+    max-width: min(52vw, 220px);
+  }
+
+  .top-contact-item:last-child .top-contact-link {
+    max-width: min(36vw, 120px);
+  }
+
   .menu-toggle {
     display: block;
     order: -1;
     margin-right: 10px;
     z-index: 10000;
   }
-  
+
   /* SHOW MOBILE LOGO SECTION */
   .mobile-logo-section {
     display: flex;
     align-items: center;
     gap: 10px;
     flex: 1;
+    min-width: 0;
     z-index: 1003;
     margin-left: 10px;
   }
-  
+
   .mobile-logo {
     display: block;
   }
-  
+
   .mobile-logo-img {
     width: 40px;
     height: 40px;
@@ -904,13 +927,14 @@ body.mobile-menu-open {
     border-radius: 5px;
     border: 2px solid #ffa500;
   }
-  
+
   .mobile-logo-text {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0;
   }
-  
+
   .mobile-logo-title {
     color: #2c3e50;
     font-size: 0.9rem;
@@ -921,7 +945,7 @@ body.mobile-menu-open {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   .mobile-tagline {
     color: #ff6b6b;
     font-size: 0.7rem;
@@ -931,24 +955,25 @@ body.mobile-menu-open {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   /* HIDE DESKTOP NAV ON MOBILE */
   .main-nav {
     display: none;
   }
-  
+
   .donate-section {
     display: none;
   }
-  
+
   /* SHOW MOBILE MENU OVERLAY */
   .mobile-menu-overlay {
     display: block;
   }
-  
+
   .header-content {
     justify-content: space-between;
     padding: 0 5px;
+    min-width: 0;
   }
 }
 
@@ -956,20 +981,20 @@ body.mobile-menu-open {
   .top-bar-right {
     gap: 10px;
   }
-  
+
   .top-social-media {
     display: flex;
     gap: 8px;
   }
-  
+
   .social-icons-container {
     gap: 8px;
   }
-  
+
   .social-icon {
     font-size: 0.7rem;
   }
-  
+
   .top-follow-text {
     display: none;
   }
@@ -979,54 +1004,55 @@ body.mobile-menu-open {
   .top-black-bar {
     height: 45px;
   }
-  
+
   .main-header {
     top: 45px !important;
     height: 55px;
   }
-  
+
   .top-contact-info {
     gap: 5px;
   }
-  
+
   .top-contact-link {
     font-size: 0.55rem !important;
   }
-  
+
   .mobile-logo-section {
     gap: 8px;
+    margin-left: 6px;
   }
-  
+
   .mobile-logo-img {
     width: 35px;
     height: 35px;
   }
-  
+
   .mobile-logo-title {
     font-size: 0.8rem;
   }
-  
+
   .mobile-tagline {
     font-size: 0.65rem;
   }
-  
+
   .mobile-menu-logo img {
     width: 50px;
     height: 50px;
   }
-  
+
   .mobile-menu-logo-text h2 {
     font-size: 0.9rem;
   }
-  
+
   .mobile-menu-logo-text p {
     font-size: 0.7rem;
   }
-  
+
   .header-content {
     padding: 8px 0;
   }
-  
+
   .menu-toggle {
     margin-right: 5px;
   }
@@ -1036,38 +1062,38 @@ body.mobile-menu-open {
   .top-black-bar {
     height: 40px;
   }
-  
+
   .main-header {
     top: 40px !important;
     height: 50px;
   }
-  
+
   /* Hide contact info on very small screens */
   .top-contact-info {
     display: none;
   }
-  
+
   .top-bar-right {
     display: none;
   }
-  
+
   .top-bar-content {
     justify-content: center;
   }
-  
+
   .mobile-logo-title {
     font-size: 0.8rem;
   }
-  
+
   .mobile-tagline {
     font-size: 0.6rem;
   }
-  
+
   .mobile-logo-img {
     width: 30px;
     height: 30px;
   }
-  
+
   .menu-toggle {
     font-size: 1.3rem;
   }

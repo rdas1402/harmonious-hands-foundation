@@ -4,6 +4,21 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
 /* Reset link styles */
 a {
   text-decoration: none;
@@ -57,22 +72,22 @@ html {
 
 @media (max-width: 768px) {
   body {
-    padding-top: 70px; /* Reduced for mobile */
+    padding-top: 100px; /* Space for fixed mobile contact bar + header */
   }
-  
+
   html {
-    scroll-padding-top: 70px;
+    scroll-padding-top: 100px;
   }
-  
+
   .section {
     padding: 40px 0;
-    scroll-margin-top: 70px;
+    scroll-margin-top: 100px;
   }
-  
+
   .section-title {
     margin-bottom: 30px;
   }
-  
+
   .btn {
     padding: 6px 16px;
   }
@@ -80,14 +95,28 @@ html {
 
 @media (max-width: 480px) {
   body {
-    padding-top: 65px;
+    padding-top: 100px;
   }
-  
+
   html {
-    scroll-padding-top: 65px;
+    scroll-padding-top: 100px;
   }
-  
+
   .section {
-    scroll-margin-top: 65px;
+    scroll-margin-top: 100px;
+  }
+}
+
+@media (max-width: 360px) {
+  body {
+    padding-top: 90px;
+  }
+
+  html {
+    scroll-padding-top: 90px;
+  }
+
+  .section {
+    scroll-margin-top: 90px;
   }
 }

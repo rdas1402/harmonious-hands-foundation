@@ -416,8 +416,7 @@ const Header = ({
                 </span>
               </button>
               
-              {/* FORCE DROPDOWN TO ALWAYS SHOW FOR TESTING */}
-              {(expandedSection === 'about' || true) && (
+              {expandedSection === 'about' && (
                 <div className="mobile-expandable-menu">
                   <button 
                     onClick={(e) => {
